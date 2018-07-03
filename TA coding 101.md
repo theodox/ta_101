@@ -12,7 +12,7 @@ Know where you're at
 
 The first and most important principle for our code is to know what _kind_ of code it's supposed to be.  A simple user facing tool isn't the same thing as a piece of library code that will be run thousands of times.  Runtime Unreal code is not the same thing as an artist tool.  Not every line of code demands the same level of scrutiny.
 
-Broadly speaking there are four kinds of code we write:
+Broadly speaking there are four kinds of code we write, starting from the most deep and deliberate and moving up towards user facing code which needs to be responsive to user feedback.
 
 ### Runtime code
 
@@ -85,4 +85,28 @@ Again, this is not about _coding_ standards.  Design standards are 'how do we ap
 5. Split out content that changes frequently from content that changes rarely.  Usually this means keeping 'code' and 'data' separate -- but it also means isolatiing complex algorithms from structures.
 6. Don't use classes as namespaces, that's what modules are for
 7. Want a singleton? Use a module.
-8.  
+8. Write idiomatically.  Don't write Python in C++ or C# in Python.
+9. Don't optimize on faith.  Write a simple, working example and then profile it if you're worried about performance.  Don't write a complex, tweaked out version until (a) you know the algorithm and problems solving approach actually work and (b) you need more perf.
+
+
+Working together
+================
+As the department grows we need to do a better job of making sure we spread vital knowledge around. 
+
+In order to do that, new features, systems or tools should always involve at least two people:  an **implementer** and an **understudy**.  The implementer does the bulk of the work, but the understudy is an important part of the process.  The goal here is to strike a good balance between individual autonomy in design and implementation on one side and encouraging collective ownership of code and tools on the other.  It's well short of [pair programming](https://www.agilealliance.org/glossary/pairing/#q=~(filters~(postType~(~'page~'post~'aa_book~'aa_event_session~'aa_experience_report~'aa_glossary~'aa_research_paper~'aa_video)~tags~(~'pair*20programming))~searchTerm~'~sort~false~sortDirection~'asc~page~1)) but it's more structured than our current approach.
+
+The relationship  looks like this:
+
+**Design review**  When the feature is first sketched out, the implementer will have to do some homework on how to approach the problem.  This could involve anything from reading a talking to customers to digging up research papers to reading code in the Unreal Engine.  When the implementer has a general idea of how to proceed, s/he should run it by the understudy to make sure that it makes sense.  The understudy should explicitly sign off on the general direction.  This could be as simple as 
+    
+> "Hey X -- I think I'm going to tackle this by creating a map of CharacterAssets to ClothingAssets and storing that as an Unreal Datable.  Users can open that in the editor and add their annotiations that way" 
+> "Sounds good, maybe you should talk to Marky about how he handled that for the facilities system."
+
+or it could involve an actual whiteboarding session.  The point is not to team design things - it's to make sure that there are more eyes on the problem. Discussion can help head off potential problems or simply provide context for future code reviews. Understudies can, and should, remind implementers if there is existing functionality that can be reused.  Less is more!
+
+**Code review**  As the feature or system progresses, understudies should review major checkins.  We'll need to work out the right cadence, it's too much to expect that every checkin will be reviewed by another person.  But significant waypoints in the evolution of the feature should be reviewed. The goal is that the finished code is at least somewhat familiar to at least two people at all times.  An important part of the understudy's review process will be pointing out places where the code needs comments or is hard to follow, and to encourage attention to our general design standards. 
+
+**Wrap up** Nothing is done unless it's readably commented (for other coders) and documented (for end users).  The final documentation pass should fall on the understudy, with input and review from the implementer. This is important for making sure that the system makes sense to at least two people.
+
+In many cases -- particularly for more complex jobs -- the understudy will also be working on the same code.  In cases like that the two roles should basically be reversed as needed:  A understudies B's work and vice-versa.  
+
