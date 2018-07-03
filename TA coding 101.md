@@ -82,5 +82,7 @@ Again, this is not about _coding_ standards.  Design standards are 'how do we ap
 3. Solutions, then abstractions, then shipping code.  Working through a problem is usually messy, and produces messy code. That's ok as a prototype: if you write a new tool it might be full of odd, one-off jobs.  However once a tool moves into production it should be refactored into as clean and simple a form as possible. Once you see how things fit together you are in far better place to pick the right abstractions for the final version.  At that point   
 2. ["We hate code. We want to ship as little of it as possible"](https://www.youtube.com/watch?v=o9pEzgHorH0).
 4. Write for the reader. 9/10th of the life of a line of code is in maintenance and bug-fixing.  Take the time to write clear, descriptive names for everything. Add comments, particularly if there are edge cases or special reasons you've made a decision. Required reading: [The Art of Readable Code](https://www.amazon.com/Art-Readable-Code-Practical-Techniques/dp/0596802293)
-
-2. 
+5. Split out content that changes frequently from content that changes rarely.  Usually this means keeping 'code' and 'data' separate -- but it also means isolatiing complex algorithms from structures.
+6. Don't use classes as namespaces, that's what modules are for
+7. Want a singleton? Use a module.
+8.  
