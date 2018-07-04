@@ -88,6 +88,7 @@ Again, this is not about _coding_ standards.  Design standards are 'how do we ap
 7. Want a singleton? Use a module.
 8. Write idiomatically.  Don't write Python in C++ or C# in Python.
 9. Don't optimize on faith.  Write a simple, working example and then profile it if you're worried about performance.  Don't write a complex, tweaked out version until (a) you know the algorithm and problems solving approach actually work and (b) you need more perf.
+10. Less state, more functions. Write as much functional code as possible -- pure functions that can be tested in isolation.  See https://www.youtube.com/watch?v=DJtef410XaM
 
 
 Working together
