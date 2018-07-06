@@ -35,7 +35,7 @@ When working on runtime code, we need to be sure to:
 * Use profiling data to make sure you're optimizing the right things
 * Make sure we understand the memory costs of our work
 
-### framework code
+### Frameworks
 
 This is code that's intended to solve a general problem in a repeatable way.  It could be a library for reading and writing a particular file type, or a system for adding metadata to an import pipeline.  Out-of-house examples would be something like the `xmltree` module or `django`, which will be specialized by other users to solve concrete problems.
 
@@ -52,9 +52,7 @@ Famework code needs to:
 
 Framework code is going to be deep down in the foundational layers of code that users see. Because it's not close to users it can't make assumptions on their behalves. Framework code should resist the temptation to make guesses about what users want: just fail loudly and let code closer to the user decide what to do next.
 
-
-
-### library code
+### Libraries
 
 This is the largest category of TA code -- the place where most of the problem / solution work is actually done.  Library code is re-usable code that's specific to particular problem set:  dealing with UV sets in Maya, or providing debug info in Unreal.  Like framework code, libraries are basically invisible to end users: the customers for libraries are fellow coders.
 
@@ -64,23 +62,31 @@ First and foremost, it _encourages the re-use of high quality code_ -- as Python
 
 Second, it's intended to cut down _repetitive nuisance code_ -- a good library makes sure that more code is tested and bulletproofed and that one-off, unique code really is unique.  
 
-Library code is how we accumulate knowledge about our problem spaces: it's big role in the code ecosystem is to formalize best practices and cut down on wheel-reinvention.
+Library code is how we accumulate knowledge about our problem spaces. It formalizes best practices and cuts down on wheel-reinvention.
 
 Because of these roles, library code needs to:
 
-* Be clear, well organized, and discoverable.  It's no good making libraries if nobody else knows they are there.
-* Be well tested and reliable.  This is code that will be heavily reused and it needs to be as deterministic as possible.
-* Stick to one problem domain.  A library for processing geometry should not expose a string formatting function.
-* Avoid UI concerns.  Library code is code for other code to use.
-* Be willing to fail.  Library code does not know about context. Decisions about what to do if something goes wrong are left to user-facing tools.
+#### Be clear, well organized, and discoverable  
+It's no good making libraries if nobody else knows they are there.
+
+#### Be well tested and reliable  
+This is code that will be heavily reused and it needs to be as deterministic as possible.
+
+#### Stick to one problem domain
+A library for processing geometry should not expose a string formatting function.
+#### Avoid UI concerns
+Library code is code for other code to use.
+
+#### Fail  
+Library code does not know about context. Decisions about what to do if something goes wrong are left to user-facing tools.
 
 Library code resembles framework code in one way: it's still far away from the user, so it should not try to make assumptions on the user's behalf. Unlike framework code, though, library code does not want to impose a programming style or paradigm: the api of a library is basically just a set of well named and well documented functions.
 
-Good libraries are easy to spot: they make it easy to do the right thing and hard to do the wrong thing.  [This talk is technically about C++, but it's a good discussion of the ways api design and UX design are similar](https://youtu.be/5tg1ONG18H8) in any language.
+Good libraries are easy to spot: they make it easy to do the right thing and hard to do the wrong thing.  [This talk](https://youtu.be/5tg1ONG18H8) is nominally about C++, but it's a good discussion of the ways api design and UX design are similar in any language.  Libraries should be designed for simplicity, consistency and lack of surprises.
 
-### Tool code.
+### Tools.
 
-Tools are the parts of our work that are visible to our users. This is where the menus, buttons, dialogs and scripts go.  Tool coode marshals the functionality from our frameworks and libraries into a user-friendly package that's easy to maintain and support.  
+Tools are the parts of our work that are visible to our users -- this is where the menus, buttons, dialogs and scripts go.  Tool coode marshals the functionality from our frameworks and libraries into a user-friendly package that's easy to maintain and support.  
 
 Tool code needs to:
 
@@ -102,13 +108,15 @@ Tool code needs to:
 Design standards [](#design_standards)
 ================
 
-Again, this is not about _coding_ standards.  Design standards are 'how do we approach a problem.'
+Again, this is not about _coding_ standards.  Design standards are about how we approach problems, not what the solution looks like written down.
 
-These sections are not just 'rules': they actually form a logical sequence.  TA code is a bit different from other programming problems -- even by software standards our world is chaotic and prone to change.  All of these guidelines are intended to help us build more stability into an environment that is prone to frequent, unplanned changes.  
+These sections are not really 'rules': they form a logical sequence.  TA code is a bit different from other programming problems -- even by software standards our world is chaotic and prone to change.  These guidelines are intended to help us build more stability into an environment that is prone to frequent, unplanned changes.  
 
 ### Talk it out.
 
-_Don't start writing._  Start by _talking_ to colleagues and customers to make sure you understand what you're being asked to do.  In that conversation, sketch out a general idea of how it ought to work.  For a big project that's probably an actual meeting, but for most work this could be a five minute conversation with the [understudy](#understudies) on the code.
+The first thing to do when starting a new project is _don't start writing._  Start by _talking_ to colleagues and customers to make sure you understand what you're being asked to do.  
+
+In that conversation, sketch out a general idea of how it ought to work.  For a big project that's probably an actual meeting, but for most work this could be a five minute conversation with the [understudy](#understudies) on the code.
 
 The goal of talking first is to make sure that (a) the job needs doing at all, (b) it hasn't already been solved by one of our colleagues and (c) our approach to the problem isn't going to cause problems down the road.
 
@@ -118,9 +126,10 @@ It's tempting to try solving all future problems when writing code, particularly
 
 Don't. 
 
-We need to _think_ about future problems and try to solve today's issues without prejudicing future enhancements. But we don't want to write code that we don't need right now -- in TA work there's a high likelihood that the future we are envisioning won't ever arrive, or will arrive in an almost unrecognizable form. 
+We need to _think_ about future problems and try to solve today's issues without prejudicing future enhancements. But we don't want to actually write code that we don't need right now.  
 
-So, don't do work today to solve a problem that may never come to pass.
+The hard truth of TA life is that the future we are envisioning may not ever arrive, or will arrive in an almost unrecognizable form.  So, don't do work today to solve a problem that may never come to pass.
+
 An idea for how to solve a future problem is a great note to put into a comment or @todo.  But don't write future code until it serves a present need.  Long-lived library and especially framework code need to be more future-friendly.  However, even there it's a good idea to write as little code as is practical today.
 
 ### Garden your code
@@ -128,9 +137,9 @@ An idea for how to solve a future problem is a great note to put into a comment 
 Code is alive. We want to guide its growth and trim it back when it gets overgrown.  An ongoing diet of small upgrades and improvements is better than letting code rot for years and then doing dramatic, drastic surgery on it. 
 Refactoring is just an ongoing part of maintenance --  not a scary dramatic intervention.
 
-For this reaon, we want to be comfortable with refactoring tools.  We want to do as much testing as possible so that  maintenance with maximum safety and minimal disruption.   
+For this reaon, we want to be comfortable with refactoring as a regular part of our work.  We want to do as much testing as possible so that maintenance can be done with maximum safety and minimal disruption.   
 
-We also want to retire code that's not serving a purpose any longer.  It's all backed up, if we need it again some day we can find it again.  But leaving unused code around provides a temptation to borrow from it -- which can keep not only the one function that was borrowed, but all of its dependencies alive.
+We also want to retire code that's not serving a purpose any longer.  It's all backed up, if we need it again some day we can find it again.  But leaving unused code around provides a temptation to borrow from it -- thereby to keep alive no just the one function that was borrowed, but all of its dependencies alive.
 
 ### Test if you can
 
@@ -209,7 +218,7 @@ Follow the [Unreal coding standards](https://docs.unrealengine.com/en-us/Program
 
 #### Python
 
-Follow [Pep-8]https://www.python.org/dev/peps/pep-0008/?).  We allow up to 120 characters wide (instead of the 80 characters in default pep-8) to avoid wasting time noodling on line breaks.  In Sublime Text use the [Anaconda](http://damnwidget.github.io/anaconda/) plugin for linting; in PyCharm use the default linter.  Use 4-space indentation.
+Follow [Pep-8](https://www.python.org/dev/peps/pep-0008/?).  We allow up to 120 characters wide (instead of the 80 characters in default pep-8) to avoid wasting time noodling on line breaks.  In Sublime Text use the [Anaconda](http://damnwidget.github.io/anaconda/) plugin for linting; in PyCharm use the default linter.  Use 4-space indentation.
 
 
 Working together [](#understudies)
