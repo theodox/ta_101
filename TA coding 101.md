@@ -30,10 +30,10 @@ This kind of code needs to be carefully vetted for memory usage and performance.
 
 When working on runtime code, we need to be sure to:
 
-* Get code reviews from inside and outside the team
-* Stay in touch with engineering to make sure that our code complements theirs
-* Use profiling data to make sure you're optimizing the right things
-* Make sure we understand the memory costs of our work
+* **Get code reviews** from inside and outside the team
+* **Stay in touch with engineering** to make sure that our code complements theirs
+* **Use profiling data** to make sure you're optimizing the right things
+* Make sure we **understand the memory costs** of our work
 
 ### Frameworks
 
@@ -43,12 +43,12 @@ Framework code is more general and high level than other kinds of code library. 
 
 Famework code needs to:
 
-* Be well reviewed to get buy-in
-* Be carefully designed. This kind of code gets reused in many places and needs to be solid.
-* Have high test coverage. Because framework code is heavily reused, we need tests to ensure that it doesn't cause bugs as it evolves.
-* Do a small number of things extremely well.
-* Provide a clear, well documented interface.
-* Explain its own assumptions and paradigms
+* **Be well reviewed** to get buy-in
+* **Be carefully designed**. This kind of code gets reused in many places and needs to be solid.
+* **Have high test coverage**. Because framework code is heavily reused, we need tests to ensure that it doesn't cause bugs as it evolves.
+* **Do a small number of things extremely well**.
+* **Provide a clear, well documented interface**.
+* **Explain its own assumptions** and paradigms
 
 Framework code is going to be deep down in the foundational layers of code that users see. Because it's not close to users it can't make assumptions on their behalves. Framework code should resist the temptation to make guesses about what users want: just fail loudly and let code closer to the user decide what to do next.
 
@@ -66,15 +66,11 @@ Library code is how we accumulate knowledge about our problem spaces. It formali
 
 Because of these roles, library code needs to:
 
-#### Be clear, well organized, and discoverable  
-It's no good making libraries if nobody else knows they are there.
-
-#### Be well tested and reliable  
-This is code that will be heavily reused and it needs to be as deterministic as possible.
-
-#### Stick to one problem domain
+- **Be clear, well organized, and discoverable** It's no good making libraries if nobody else knows they are there.
+- **Be well tested and reliable** This is code that will be heavily reused and it needs to be as deterministic as possible.
+- **Stick to one problem domain**
 A library for processing geometry should not expose a string formatting function.
-#### Avoid UI concerns
+- **Avoid UI concerns**
 Library code is code for other code to use.
 
 #### Fail  
@@ -90,16 +86,16 @@ Tools are the parts of our work that are visible to our users -- this is where t
 
 Tool code needs to:
 
-* Make good use of available frameworks and libraries.  Don't reinvent the wheel -- make sure that you've looked for existing solutions.
-* Work independently of its own GUI. We may want to batch the tools operation, or change the way the operations are bundled together -- tying functionality to particular UI layouts makes tools harder to design and maintain.
-* Make good decisions for users.  Unlike library and framework code, tools include a lot of user-facing code.  Tools should have good defaults and safe, unsurprising behavior.
-* Deal with bad data.  Tools usually have a user present to ask for help, so it's tool's job to deal with the unexpected.
-* NOT import other tool code. A tool is the root of a dependency tree -- if tools import each other, the structure becomes impossible to maintain. If you want a function from another tool, that's a good reason to suspect that that function needs to migrate upstream to a library.
+* **Make good use of available frameworks and libraries**.  Don't reinvent the wheel -- make sure that you've looked for existing solutions.
+* **Work independently of its own GUI**. We may want to batch the tools operation, or change the way the operations are bundled together -- tying functionality to particular UI layouts makes tools harder to design and maintain.
+* **Make good decisions for users**.  Unlike library and framework code, tools include a lot of user-facing code.  Tools should have good defaults and safe, unsurprising behavior.
+* **Deal with bad data**.  Tools usually have a user present to ask for help, so it's tool's job to deal with the unexpected.
+* **NOT import other tool code**. A tool is the root of a dependency tree -- if tools import each other, the structure becomes impossible to maintain. If you want a function from another tool, that's a good reason to suspect that that function needs to migrate upstream to a library.
 
 ### TLDR:
-* Frameworks are standalone code, with careful design and heavy testing
-* Libraries are code for code reuse.  They are building blocks to make the process of delivering tools faster and less tedious.  Libaries use frameworks and sometimes other libraries
-* Tools import a variety of libraries and/or frameworks to accomplish an actual job for our end users. 
+* **Frameworks** are standalone code, with careful design and heavy testing
+* **Libraries** are code for code reuse.  They are building blocks to make the process of delivering tools faster and less tedious.  Libaries use frameworks and sometimes other libraries
+* **Tools** import a variety of libraries and/or frameworks to accomplish an actual job for our end users. 
     + Tools don't import other tools
     + UI always lives at the level of tools.
     + If code in a tool turns out to be generally useful, push it up into a new or existing library.  And then test it.
@@ -173,8 +169,6 @@ In keeping with that:
 There are situations where a higher-level approach adds more simplicity over the long haul.  These are cases for writing frameworks.  However these situations are _rare_.
 
 
-
-
 ### Don't optimize on faith.  
 
 Write a simple, working example and then profile it.  Don't expend effort on speculative optimizations until (a) you know the algorithm and problems solving approach actually work and (b) you need more perf.  
@@ -209,12 +203,16 @@ Don't write Python in C++ or C# in Python.  Most of us like one language more th
 
 [This video](https://www.youtube.com/watch?v=wf-BqAjZb8M) is specifically about Python but it's a good illustration of the difference between writing code that's formally correct and code thats idiomatic.
 
-[This one](https://youtu.be/xnqTKD8uD64) covers modern C++ with a good, reasonable approach to managing complexity.
+[This one](https://www.youtube.com/watch?v=hEx5DNLWGgA) covers modern C++ with a good, reasonable approach to managing complexity, though it's not quite as punchy.
+
+[This one](https://www.youtube.com/watch?v=anrOzOapJ2E) illustrates a lot of good ways to make code more 'pythonic'
 
 ### Formatting
 
 #### C++
-Follow the [Unreal coding standards](https://docs.unrealengine.com/en-us/Programming/Development/CodingStandard). 
+Follow the [Unreal coding standards](https://docs.unrealengine.com/en-us/Programming/Development/CodingStandard).  Use the [Clang Format](https://marketplace.visualstudio.com/items?itemName=LLVMExtensions.ClangFormat) plugin in visual studio and or the equivalent [plugin](https://packagecontrol.io/packages/Clang%20Format) for Sublime.
+
+> @TODO: get the canonical clang format file as an appendix
 
 #### Python
 
