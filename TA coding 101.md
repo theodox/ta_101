@@ -6,7 +6,7 @@ Intro [](#intro)
 
 This document is intended as a reference for our shared coding work. It's an attempt to balance the need for consistency and standardization with individual styles and ownership.  
 
-This is not exactly a traditional 'coding standards' document: things like where to put your commas are really a problem for machines, not people. See [Coding Standards](CodingStandards) below for details, but keep in mind that formatting is the least interesting part of the problem set.  
+This is not exactly a traditional 'coding standards' document: things like where to put your commas are really a problem for machines, not people. See [Coding Standards](#CodingStandards) below for details, but keep in mind that formatting is the least interesting part of the problem set.  
 
 It's also not about rules like _use this language feature_, or _use this paradigm_. There are some rules of thumb here, but this doc is not a code cookbook.  It is intended to help us collectively think about how our work and our code fits together. 
 
