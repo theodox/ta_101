@@ -243,3 +243,63 @@ Understudies can, and should, remind implementers if there is existing functiona
 
 In many cases -- particularly for more complex jobs -- the understudy will also be working on the same code.  In cases like that the two roles should basically be reversed as needed:  A understudies B's work and vice-versa.  
 
+Style notes
+============
+
+This section is going to be a bit subjective, and is not intended to be enforced as 'rules'.  It's a set of style considerations to consider when you are designing new code structures.  
+
+
+Python style
+===========
+
+First and foremost, think about how Python wants to be written.  Simplicity and readability are key values in python code.  
+
+Since a lot of our python is written inside of Maya we are often writing agains an api that is not very simple or readable. Its worth making small investments in code that makes common operations less wordy and more readable.  For example Maya wants you to do this to create and work in a new namespace:
+
+
+     cmds.namespace(set = ":")  
+     #  you have to go back to the root namespace, or you'll create a child
+     cmds.namespace(add = 'new_ns')
+     cmds.namespace(set = 'new_ns')
+     
+     # ... do work here ...
+     cmds.namespace(set = ":")  
+
+     # return to root, or other work will be done in your namespace 
+
+This is all very simple, and maya vets don't think it's a big deal.  However, for four lines of boilerplate it has four significant weaknesses:
+
+1. If you forget to reset the namespace at the top, the rest of the code will quietly produce data in the wrong place
+2. If you mistype the namespace in the second or third lines, the code will fail
+3. If you forget the reset the namespace at the end of the block, you'll be changing the behavior or other code.
+4. If the work code raises an exception, the namespace won't be reset
+
+Python has a great mechanism for dealing with this kind of setup-work-cleanup paradigm: the `with` statement.  It's not a lot of work to create a context manager that handles the boilerplate above:
+
+```
+    class namespace(object):
+         def __init__(self, name):
+            self.name = name
+
+        def __enter__(self):
+            cmds.namespace(set = ":")
+            if self.name not in cmds.namespaceInfo(lon=True):
+                 cmds.namespace(add = 'fred')
+             cmds.namespace(set = self.name)
+             return self.name
+
+     def __exit__(self, *execption)
+        cmds.namespace(set = ":")
+        return False   
+        # this makes sure that any exceptions inside the context are 
+        # passed on after the context closes -- but the namespace 
+        # will still happen
+
+```
+
+That's a few more lines to write -- once.  But once it's written all other namespace jobs can handled much more cleanly:
+
+    with namespace('my_namespace'):
+        # do work
+
+
