@@ -153,11 +153,11 @@ This goes hand in hand with getting comfortable with refactoring as a regular ev
 
 However, once a tool moves into production it should be refactored into as clean and simple a form as possible. Once you see how things fit together you are in far better place to pick the right abstractions for the final version.  It's also a good time to see what parts of the tool are really general purpose code and can be pushed upstream into reusable library code.  And, when the problem involves some wierd, idiosyncratic code make sure to comment the reasons.  
 
-What you write should get better over time -- just because it's not springing fully formed from your [*].
+What you write should get better over time.  It's very rare that you'll understand the whole problem set the first time. Good design will make it possible to add or extend the initial feature set in response to feedback and to the problems that only show up over time.  Again, being comfortable with refactoring makes it easier to adapt to new problems.  Every kind of coder struggles with the balance between 'just get it done' and the designing the perfectly general system that can be extended to all eventualities. The safest approach is to strike a middle ground: start small and improve, taking time to go back and rationalize the basic structure as you understand it better.
 
 ###  Less is more
 
-A wise man once said ["We hate code. We want to ship as little of it as possible"](https://www.youtube.com/watch?v=o9pEzgHorH0).  Not everything needs to be a class or a metaprogramming paradigm.  We ought to start with the simplest solution first, and add complexity when its called for.  Since we want to be comfortable with refactoring anyway there's no need to write a complex system until the simple system is failing to work.  
+Starting small has another benefit as well. A wise man once said ["We hate code. We want to ship as little of it as possible"](https://www.youtube.com/watch?v=o9pEzgHorH0).  Not everything needs to be a class or a metaprogramming paradigm.  We ought to start with the simplest solution first, and add complexity when its called for.  Since we want to be comfortable with refactoring anyway there's no need to write a complex system until the simple system is failing to work.  
 
 In keeping with that:
 
@@ -171,9 +171,13 @@ There are situations where a higher-level approach adds more simplicity over the
 
 ### Don't optimize on faith.  
 
-Write a simple, working example and then profile it.  Don't expend effort on speculative optimizations until (a) you know the algorithm and problems solving approach actually work and (b) you need more perf.  
+Performance occupies a strange place in TA coding.  On the one hand, it's often a secondary consideration: the difference between a one-a-day button push that takes one second and one that takes two seconds is not really that important.  On the other hand, responsiveness is a critical part of how users will see your tools.  If the tool _feels_ slow it will be unpopular, even if it's useful.  
 
-Optimized code is a good thing -- when it's not a bad thing.  If the basic design is sound, it's usually possible to improve with optimization tricks.  But if the basic design is not sound, trying to speed it up with lots of micro-optimization is a lot of work and not [*].  Save the gimmicky stuff for the last stage of stuff that's working, reliable and has already been checked against a profiler.
+So, it's not usually a good idea to write everything from the ground up as a super-optimized piece of code torture that wrings every last millisecond out of the hardware.  That takes a lot of precious time you could be spending on helping your users in other ways.  On the other hand it will often be the case that what you write will be better and get more use from your customers if it feels snappier.
+
+Trying to balance these conflicting needs isn't always easy, but when you do see a place where performance does matter, take the time to optimize it correctly.  Write a simple, working example and then profile it.  Don't expend effort on speculative optimizations until (a) you know the algorithm and problems solving approach actually work and (b) you need more perf.  
+
+Optimized code is a good thing -- when it's not a bad thing.  If the basic design is sound, it's usually possible to improve with optimization tricks.  But if the basic design is not sound, trying to speed it up with lots of micro-optimization is a lot of work that may or may not really pay off.  **Save the gimmicky stuff** for the last stage of stuff that's working, reliable and has already been checked against a profiler.
 
 Coding Standards[](#code_standards)
 ================
@@ -184,18 +188,17 @@ This is the part of the doc that approximates a traditional coding standard.
 
 Code formatting is not an interesting problem.  All standards rub somebody the wrong way.  But even a standard that you personally dislike is probably fine: it's job is too make your work more readable to _other_ people.  
 
-So: suck it up and use the conventions of the environment you're in.  
+So: **suck it up and use the conventions of the environment you're in**. 
 
 ### Write readable code.
 
 9/10th of the life of a line of code is in maintenance and bug-fixing.  Take the time to write clear, descriptive names for everything -- classes, functions, and variables. 
 
-Add comments, particularly if there are edge cases or special reasons you've made a decision. 
+Add comments, particularly if there are edge cases or special reasons you've made a decision.  Good function and variable names go a long way -- but if you have to do something that looks wierd because it's accomodating a quirk in Maya or Unreal, leave a comment so the next person in knows not to 'fix' it.
 
 So:  **It's not done till it's properly named and commented.**  Comments for other coders and docs for users are _as important_ as code.  When reviewing each other's work we should always call out opportunities for better codes and comments.
 
 For precise advice what good names and comments look like, follow the guidelines in sections one of [The Art of Readable Code](https://www.amazon.com/Art-Readable-Code-Practical-Techniques/dp/0596802293).  We can adapt those rules for language flavor -- that is, use Unreal-style casing in C++ and underscored names in python -- but the principles are the same everywhere.  **Required reading.**
-
 
 ### Write idiomatically. 
 
