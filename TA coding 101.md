@@ -82,7 +82,7 @@ Good libraries are easy to spot: they make it easy to do the right thing and har
 
 ### Tools.
 
-Tools are the parts of our work that are visible to our users -- this is where the menus, buttons, dialogs and scripts go.  Tool coode marshals the functionality from our frameworks and libraries into a user-friendly package that's easy to maintain and support.  
+Tools are the parts of our work that are visible to our users -- this is where the menus, buttons, dialogs and scripts go.  Tool code marshals the functionality from our frameworks and libraries into a user-friendly package that's easy to maintain and support.  
 
 Tool code needs to:
 
@@ -135,25 +135,25 @@ Refactoring is just an ongoing part of maintenance --  not a scary dramatic inte
 
 For this reaon, we want to be comfortable with refactoring as a regular part of our work.  We want to do as much testing as possible so that maintenance can be done with maximum safety and minimal disruption.   
 
-We also want to retire code that's not serving a purpose any longer.  It's all backed up, if we need it again some day we can find it again.  But leaving unused code around provides a temptation to borrow from it -- thereby to keep alive no just the one function that was borrowed, but all of its dependencies alive.
+We also want to retire code that's not serving a purpose any longer.  It's all backed up, if we need it again some day we can find it again.  But leaving unused code around provides a temptation to borrow from it -- thereby to keep alive not just the one function that was borrowed, but all of its dependencies alive.
 
 ### Test if you can
 
 TA work makes it hard to completely embrace [test-driven development]().  Because a lot of TA work happens inside complex environments that we don't control from end to end, it's hard to hit 100% test coverage without a lot of work.
 
-However, tests are still an extremely valuable tool.  Tests are particularly important if we want to make refactoring a regular, ongoing part of our work: refactoring is a far less scary prospect when you have tests which demonstrate that moving a file or renaming a method has not created surprising sideffects.
+However, tests are still an extremely valuable tool.  Tests are particularly important if we want to make refactoring a regular, ongoing part of our work: refactoring is a far less scary prospect when you have tests which demonstrate that moving a file or renaming a method has not created surprising side effects.
 
-Another very important benefit of tests is that testing encourages good design.  Testable code is generally going to be less complicated, less overly coupled, and less prone to wierd side effect bugs.  [This talk](https://youtu.be/DJtef410XaM) is Python specific but it lays out the case for why testing makes for better code structure overall very well -- and the idea that he's actually propunding originated in Java. 
+Another very important benefit of tests is that testing encourages good design.  Testable code is generally going to be less complicated, less overly coupled, and less prone to wierd side effect bugs.  [This talk](https://youtu.be/DJtef410XaM) is Python specific but it lays out the case for why testing makes for better code structure overall very well -- and the idea that he's actually propounding originated in Java. 
 
-Library and framework code should be tested.  Tools code -- with it's UI and scene dependencies is harder to test, but even there it's a good idea to design is in ways where testing is possible.
+Library and framework code should be tested.  Tools code -- with it's UI and scene dependencies is harder to test, but even there it's a good idea to design it in ways where testing is possible.
 
 ### Good enough.
 
-This goes hand in hand with getting comfortable with refactoring as a regular event. Working through a problem is usually messy, and produces messy code. Every new tool is  full of odd, one-off bits of code.  Getting a good understanding of the problem usually requires experimentation and that's OK.
+This goes hand in hand with getting comfortable with refactoring as a regular event. Working through a problem is usually messy, and produces messy code. Every new tool is full of odd, one-off bits of code.  Getting a good understanding of the problem usually requires experimentation and that's OK.
 
 However, once a tool moves into production it should be refactored into as clean and simple a form as possible. Once you see how things fit together you are in far better place to pick the right abstractions for the final version.  It's also a good time to see what parts of the tool are really general purpose code and can be pushed upstream into reusable library code.  And, when the problem involves some wierd, idiosyncratic code make sure to comment the reasons.  
 
-What you write should get better over time -- just because it's not springing fully formed from your.
+What you write should get better over time -- just because it's not springing fully formed from your [*].
 
 ###  Less is more
 
@@ -173,7 +173,7 @@ There are situations where a higher-level approach adds more simplicity over the
 
 Write a simple, working example and then profile it.  Don't expend effort on speculative optimizations until (a) you know the algorithm and problems solving approach actually work and (b) you need more perf.  
 
-Optimized code is a good thing -- when it's not a bad thing.  If the basic design is sound, it's usually possible to improve with optimization tricks.  But if the basic design is not sound, trying to speed it up with lots of micro-optimization is a lot of work and not.   Save the gimmicky stuff for the last stage of stuff that's working, reliable and has already been checked against a profiler.
+Optimized code is a good thing -- when it's not a bad thing.  If the basic design is sound, it's usually possible to improve with optimization tricks.  But if the basic design is not sound, trying to speed it up with lots of micro-optimization is a lot of work and not [*].  Save the gimmicky stuff for the last stage of stuff that's working, reliable and has already been checked against a profiler.
 
 Coding Standards[](#code_standards)
 ================
@@ -194,7 +194,7 @@ Add comments, particularly if there are edge cases or special reasons you've mad
 
 So:  **It's not done till it's properly named and commented.**  Comments for other coders and docs for users are _as important_ as code.  When reviewing each other's work we should always call out opportunities for better codes and comments.
 
-For precise advice what good names and comments look like, follow the guidelines in sections one of [The Art of Readable Code](https://www.amazon.com/Art-Readable-Code-Practical-Techniques/dp/0596802293).  We can adapt those rules for language flavor -- is, use Unreal-style casing in C++ and underscored names in python -- but the principles are the same everywhere.  **Required reading.**
+For precise advice what good names and comments look like, follow the guidelines in sections one of [The Art of Readable Code](https://www.amazon.com/Art-Readable-Code-Practical-Techniques/dp/0596802293).  We can adapt those rules for language flavor -- that is, use Unreal-style casing in C++ and underscored names in python -- but the principles are the same everywhere.  **Required reading.**
 
 
 ### Write idiomatically. 
@@ -205,7 +205,7 @@ Don't write Python in C++ or C# in Python.  Most of us like one language more th
 
 [This one](https://www.youtube.com/watch?v=hEx5DNLWGgA) covers modern C++ with a good, reasonable approach to managing complexity, though it's not quite as punchy.
 
-[This one](https://www.youtube.com/watch?v=anrOzOapJ2E) illustrates a lot of good ways to make code more 'pythonic'
+[This one](https://www.youtube.com/watch?v=anrOzOapJ2E) illustrates a lot of good ways to make code more 'pythonic'.
 
 ### Formatting
 
@@ -229,7 +229,7 @@ The relationship looks like this:
 
 **Design review**  When the feature is first sketched out, the implementer will have to do some homework on how to approach the problem.  This could involve anything from reading a talking to customers to digging up research papers to reading code in the Unreal Engine.  When the implementer has a general idea of how to proceed, s/he should run it by the understudy to make sure that it makes sense.  The understudy should explicitly sign off on the general direction.  This could be as simple as 
     
-> "Hey X -- I think I'm going to tackle this by creating a map of CharacterAssets to ClothingAssets and storing that as an Unreal Datable.  Users can open that in the editor and add their annotiations that way" 
+> "Hey X -- I think I'm going to tackle this by creating a map of CharacterAssets to ClothingAssets and storing that as an Unreal DataTable.  Users can open that in the editor and add their annotations that way" 
 
 > "Sounds good, maybe you should talk to Marky about how he handled that for the facilities system."
 
