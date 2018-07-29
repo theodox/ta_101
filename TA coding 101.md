@@ -139,7 +139,9 @@ We also want to retire code that's not serving a purpose any longer.  It's all b
 
 ### Test if you can
 
-TA work makes it hard to completely embrace [test-driven development]().  Because a lot of TA work happens inside complex environments that we don't control from end to end, it's hard to hit 100% test coverage without a lot of work.
+TA work makes it hard to completely embrace [test-driven development](https://news.codecademy.com/test-driven-development/).  Because a lot of TA work happens inside complex environments that we don't control from end to end, it's hard to hit 100% test coverage without a lot of work.
+
+> Todo: add an appendix about viable - minimal TDD setups for Maya and Unreal
 
 However, tests are still an extremely valuable tool.  Tests are particularly important if we want to make refactoring a regular, ongoing part of our work: refactoring is a far less scary prospect when you have tests which demonstrate that moving a file or renaming a method has not created surprising side effects.
 
