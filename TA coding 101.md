@@ -245,7 +245,18 @@ or it could involve an actual whiteboarding session.  The point is _not_ to enfo
 Understudies can, and should, remind implementers if there is existing functionality that can be reused.  Less is more!
 
 #### Code Review
-As the feature or system progresses, understudies should review major checkins.  We'll need to work out the right cadence, it's too much to expect that every checkin will be reviewed by another person.  But significant waypoints in the evolution of the feature should be reviewed. The goal is that the finished code is at least somewhat familiar to at least two people at all times.  An important part of the understudy's review process will be pointing out places where the code needs comments or is hard to follow, and to encourage attention to our general design standards. 
+As the feature or system progresses, understudies should review major checkins.  We'll need to work out the right cadence, it's too much to expect that every checkin will be reviewed by another person.  But significant waypoints in the evolution of the feature should be reviewed. There are several goals here:
+
+**Ensure that finished code is at least somewhat familiar to at least two people at all times** An important part of the understudy's review process will be pointing out places where the code needs comments or is hard to follow, and to encourage attention to our general design standards. 
+**Share the good stuff**  We all have a lot to learn from each other; a neat line of code that's obvious to you may not be so clear to the next person in line, so getting and participating in reviews is important for helping to nudge us in the direction of mutually readable code.
+**Spot opportunities for reuse**  More eyes on the problem is a very good way to increase the chances that you have not reinvented the wheel -- if colleague X wrote a library to do something and you've just invented a slightly different way to do the same thing, X should at least point out the existing stuff so we get redundancy by choice, not by accident.
+
+An important part of getting high quality reviews is to set the review up with clear expectations.  In your checkin or review comments make sure to explain what the code is supposed to do and why.  Lay out the basic assumptions and general structure.  Don't be afraid to ask for advice or point out possible issues: "Does anybody know a better way to do this?" is professionalism, not weakness!
+
+Above all remember that reviews are not like high school tests; nobody wants to flunk you. We want to get good visibility into each other's code and also to be reassured that what we're doing actually makes sense to other people.  There will be disagreements about style and strategy; that's just inevitable.  But it's good to _know_ when what you're doing looks odd to others, even if you think the oddity is worth the cost.  [This article](https://www.developer.com/tech/article.php/3579756/Effective-Code-Reviews-Without-the-Pain.htm) and [this one](https://medium.freecodecamp.org/unlearning-toxic-behaviors-in-a-code-review-culture-b7c295452a3c) both have some good concrete tips on how to participate effectively on both ends of a review.
+
+**TLDR** A small investment in reviews makes us all better coders. It's not a bureaucratic hassle -- its a free course in how to be a better TA.  Not convinced? [Check out the stats!](https://blog.codinghorror.com/code-reviews-just-do-it/)
+
 
 #### Wrap Up
 Nothing is done unless it's readably commented (for other coders) and documented (for end users).  The final documentation pass should fall on the understudy, with input and review from the implementer. This is important for making sure that the system makes sense to at least two people.
