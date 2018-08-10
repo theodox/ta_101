@@ -87,7 +87,7 @@ Tool code needs to:
 * **Work independently of its own GUI**. We may want to batch the tools operation, or change the way the operations are bundled together -- tying functionality to particular UI layouts makes tools harder to design and maintain.
 * **Make good decisions for users**.  Unlike library and framework code, tools include a lot of user-facing code.  Tools should have good defaults and safe, unsurprising behavior.
 * **Deal with bad data**.  Tools usually have a user present to ask for help, so it's tool's job to deal with the unexpected.
-* **NOT import other tool code**. A tool is the root of a dependency tree -- if tools import each other, the structure becomes impossible to maintain. If you want a function from another tool, that's a good reason to suspect that that function needs to migrate upstream to a library.
+* **NOT import other tool code**. A tool is the root of a dependency tree -- if tools import each other, the structure becomes impossible to maintain. If you want a function from another tool,  that that function probably needs to migrate upstream to a library.
 
 ### TLDR:
 * **Frameworks** are standalone code, with careful design and heavy testing
