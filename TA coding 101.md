@@ -66,7 +66,7 @@ Library code is how we accumulate knowledge about our problem spaces. It formali
 
 Because of these roles, library code needs to:
 
-- **Be clear, well organized, and discoverable*.* It's no good making libraries if nobody else knows they are there.
+- **Be clear, well organized, and discoverable** It's no good making libraries if nobody else knows they are there.
 - **Be well tested and reliable.** This is code that will be heavily reused and it needs to be as deterministic as possible.
 - **Stick to one problem domain.** A library for processing geometry should not expose a string formatting function.
 - **Avoid UI concerns.**
