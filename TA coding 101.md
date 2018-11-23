@@ -249,13 +249,55 @@ Style notes
 This section is going to be a bit subjective, and is not intended to be enforced as 'rules'.  It's a set of style considerations to consider when you are designing new code structures.  
 
 
-Python style
+Appendix 1: Python style
 ===========
 
-First and foremost, think about how Python wants to be written.  Simplicity and readability are key values in python code.  
+First and foremost, think about how Python wants to be written.  Simplicity and readability are key values in python code.  There's a reason a lot of core Python developers use the word 'beautiful' a lot when talking about programming.
 
-Since a lot of our python is written inside of Maya we are often writing agains an api that is not very simple or readable. Its worth making small investments in code that makes common operations less wordy and more readable.  For example Maya wants you to do this to create and work in a new namespace:
+Unfortunately, since most of of our python is written inside of Maya we are often writing agains an API  that is neither very simple nor very readable. Everybody who works with Maya has had to write countless variations on `cmds.getAttr(object_name + '.property')` or `cmds.editDisplayLayerMembers( 'displayLayer1', query=True)`.  Neither line is a big deal -- but both impose an incremental tax on your thought process, particularly when you're reading a long, complex piece code where the Maya mechanics are main point. When you first learn Maya the challenge is simply getting things working and that kind of very explicit step-by-step code is part of the learning process. When you're more senior, you will start seeing opportunities to clean up and clarify the chattiness and clutter of the Maya api.
 
+> [This talk](https://www.youtube.com/watch?v=wf-BqAjZb8M) is a really good example of the thinking behind this section -- it's from a Python core developer explaining how to 'Pythonify' an api that was written for another language mindset.  It's a natural analogy for how we relate to Maya.
+
+## Tools for simplification
+
+### Try-Except-Finally
+
+`try` and `except` are basic parts of Python.  Their lesser-known sibling `finally` however is a very powerful tool for writing cleaner code.  The basic structure is :
+
+    try:
+        setup()
+        do_something()
+    except:
+        handle_problems()
+    finally:
+        clean_up_after_yourself()
+
+In a `try/except/finally` block the code in the `finally` section is guaranteed to execute whether or not the `try` block raised an exception.  This is important because it allows you to handle cleanup tasks knowing that they will execute regardless of whether or not the code above them succeeded or failed.  Consider something like this:
+
+    try:
+       output = open('filename', 'wt')
+       output.write( 99 / x)
+       output.close()
+    except IOError:
+        print "could not open file"
+
+This looks OK -- the code correctly handles a case where, say, 'filename' is write-locked.  However if the variable `x` is zero, the code will fail with an uncaught `ZeroDivisionError` and the file handle will be left open, which will leave an undeletable file on disk until the python interpreter is forcibly closed.  A `finally` block will make sure that the cleanup happens no matter what:
+
+    try:
+        output = open('filename', 'wt')
+        output.write( 99 / x)
+    except IOError:
+        print "could not open file"
+    finally:
+        output.close()
+
+In this version, `output` will be properly closed no matter what else happens.  In Maya programming this is often a vital tool for making sure that the scene is restored to a legitimate state if one of your tool operations goes awry.
+
+### Context managers
+
+A variant on the same theme is the context manager: the Python construct that start with `with`.  A context manager is an excellent way package up work that has a defined beginning, middle and end in a readable, but also safe way.
+
+For example, Maya wants you to do this to create and work in a new namespace:
 
      cmds.namespace(set = ":")  
      #  you have to go back to the root namespace, or you'll create a child
@@ -270,36 +312,158 @@ Since a lot of our python is written inside of Maya we are often writing agains 
 This is all very simple, and maya vets don't think it's a big deal.  However, for four lines of boilerplate it has four significant weaknesses:
 
 1. If you forget to reset the namespace at the top, the rest of the code will quietly produce data in the wrong place
-2. If you mistype the namespace in the second or third lines, the code will fail
-3. If you forget the reset the namespace at the end of the block, you'll be changing the behavior or other code.
-4. If the work code raises an exception, the namespace won't be reset
+2. If you mistype the namespace in the second or third lines, the code will fail. Because the typo is in a string, you won't know it until runtime.
+3. If you forget the reset the namespace at the end of the block, you'll be changing the behavior of all the code that runs after this.
+4. If the work code raises an exception, the namespace won't be reset and all future code will also fail.
 
-Python has a great mechanism for dealing with this kind of setup-work-cleanup paradigm: the `with` statement.  It's not a lot of work to create a context manager that handles the boilerplate above:
-
-```
-    class namespace(object):
-         def __init__(self, name):
-            self.name = name
-
-        def __enter__(self):
-            cmds.namespace(set = ":")
-            if self.name not in cmds.namespaceInfo(lon=True):
-                 cmds.namespace(add = 'fred')
-             cmds.namespace(set = self.name)
-             return self.name
-
-     def __exit__(self, *execption)
-        cmds.namespace(set = ":")
-        return False   
-        # this makes sure that any exceptions inside the context are 
-        # passed on after the context closes -- but the namespace 
-        # will still happen
+Luckily Python has a great native mechanism for dealing with this kind of setup->work->cleanup paradigm: the `with` statement.  It's not a lot of work to create a context manager that handles the boilerplate above:
 
 ```
+import maya.cmds as cmds
+class Namespace(str):
+    def __init__(self, name):
+        self._name = name
+        self.last_namespace = None
+        self.namespace = None
+
+    def __enter__(self):
+        self.last_namespace = ":" + cmds.namespaceInfo(cur=True, fn=True)
+        
+        if self._name.startswith(":"):
+            should_add = not cmds.namespace(exists = self._name)
+        else:        
+            should_add = self._name not in (cmds.namespaceInfo(lon=True, sn=True) or [])
+            
+        if should_add:
+            cmds.namespace(add = self._name)
+        cmds.namespace(set = self._name)
+        self.namespace =  ":" + cmds.namespaceInfo(cur=True, fn = True)
+        return self
+
+    def __exit__(self, *exception):
+        cmds.namespace(set = self.last_namespace)
+        return False  
+        
+    def __str__(self):
+        return self.namespace or 'invalid-namespace' 
+
+    def __repr__(self):
+        return 'Namespace("' + self.namespace  + '")' or 'Namespace(" + self.name + ")'
+```
+
 
 That's a few more lines to write -- once.  But once it's written all other namespace jobs can handled much more cleanly:
 
-    with namespace('my_namespace'):
-        # do work
+    with Namespace('my_namespace'):
+        # do work in 'my_namespace',
+        # and return to whatever namespace you were in
+        # when done
 
+Formally you could do the same work in `try-except-finally` structure and be guaranteed to get the same results.  From a readability standpoint, however, the `Namespace` context manager is a big win -- it takes a series of steps that are all related, all necessary, and all pretty common in Maya programming and renders them both safe and easily readable at the same time.
 
+### Closures
+
+Python [closures](https://www.programiz.com/python-programming/closure) are a very important tool for sharing data without the need for elaborate class structures.  The rules have some interesting subtleties, but basically they boil down to this:
+
+1. When you create a new scope -- a function or a class -- it automatically inherits the names defined in its current scope. If you declare a variable first and then declare a function right afterwards, that function gets access to that variable:
+```
+    test = "hello world"
+    def do_test():
+        print test
+    # hello world
+    print test   # here we're in the outer scope again
+    # hello world 
+```
+2. Names inherited via a closure can be _read_ (as in the above example), or _mutated_:
+```
+    test = {'hello': 'world'}
+    def do_test():
+        test['hello'] = 'sailor'
+        print test
+    # hello sailor
+    print test  # back to the outer scope -- the change sticks
+    # {'hello' : 'sailor'}
+```
+3. However, inherited names _cannot_ be re-assigned.  So, the obvious extension of the first example will not work as expected:
+```
+    test = "hello world"
+    def do_test():
+        test = 'hello sailor'
+        print test
+    # hello sailor
+    print test # back to the outer scope: no change!
+    # hello world
+```
+
+This key difference here that assignment (that is, the `=` operator) does not work its way back up the outer reference chain; instead it creates a new variable that masks the inherited version inside the local scope only. 
+
+The inheritance rule can be a bit intimidating, but closures are a very powerful tool for simplifying Python code particularly in a maya context.  Probably the best example is creating GUI, which often requires different widgets to know about each other.  Here's an example of a simple GUI that uses closures to let the different widgets communicate without the need for an elaborate class structure:
+
+```
+    def closure_window():
+        window = cmds.window(title ='closure example')
+        layout = cmds.columnLayout(adj=True)
+        rowLayout = cmds.rowLayout(nc=3)
+        increment = cmds.button(label = 'plus')
+        decrement = cmds.button(label = 'minus')
+        counter = cmds.intField()
+
+        def get_counter():
+            return cmds.intField(counter, q=True, v=True)
+
+        def set_counter (val):
+            cmds.intField(counter, e=True, v=val)
+
+        def add(_):
+            set_counter(get_counter() + 1)
+
+        def sub(_):
+            set_counter(get_counter() - 1)
+
+        cmds.button(increment, e=True, c=add)
+        cmds.button(decrement, e=True, c=sub)
+
+        cmds.showWindow(window)
+        return window
+
+```
+
+Here, the closure allows the increment and decrement buttons to know which field to affect even after the function has fired and the window has been created.  You could achieve the same effect with a class, using instance fields and instance methods to connect the different widgets together. In complicated cases that's still a good way to go. However closures provide many of the same benefits with much less overhead and should be part of your design process.  
+
+Closures are particularly attractive because they are space efficient -- however you do need to avoid going too deep, or your readers may not be able to figure out where your variable names are coming from. If you are inheriting a variable several screens away from where it originates, at least leave a comment indicating where the name comes from. The `ALLCAPS` convention for module-level constants is also a good way to remind readers when they may be seeing a closure variable.
+
+### Modules, not singletons
+
+> Note to self; move this up, and make 'modules' a separate top level header in the toolkit with a note about modules-as-namespaces and not using classes-as-namespaces
+
+In many languages it's valuable to create a singleton -- an object which is intended to be shared between many different uses.  For example, you might want to have a 'project' singleton which contained information about your working environment so that all you code knows about where to find certain kinds of information.  You would not want different parts of the same application to disagree about that kind of data, so you'd use a singleton to ensure that all project-related code was always in sync.
+
+Python does not need singletons.  If you want to maintain a single globally acccessible set of information for all possible callers, just use a module. Use module-level functions to get and set data in the module.  All users will receive the same data and none of the various elaborate hacks that people have tried to force Python classes to behave like singletons will be needed.
+
+In general, "singleton" style shared state is something to avoid whenever possible in any case.  Too much shared state makes it too easy for bugs to crop up in untraceable ways.  However when you do need to share information, use the module mechanism as the easy, Pythonic way to maintain shared data.
+
+### decorators
+
+Python decorators are a powerful tool for making simpler code. A decorator is basically just a way of wrapping a ordinary function to add some additional functionality.  For a toy example:
+
+```
+    def rightslash(original_function):
+        def right_slashed(*args):
+            result = original_function(*)
+            return result.replace('\\', '/')
+
+        return right_slashed
+
+    @rightslash
+    def working_directory():
+        return os.getcwd()
+
+    @rightslash
+    def parent_directory():
+        return os.path.dirname(__file__)
+
+```
+
+This would allow you to take a bunch of file management functions and ensure they all returned right-slashed pathnames instead of left-slashed ones on windows.  You could of course do the same thing by doing the replace operation in every one of the functions, but the decorator version has two key advantages. First, it *spells out its own intentions clearly& -- it promises the reader that a function will (in this example) return a certain kind of data. Second, it's easily extensible.  Say you discovered that you did not want to right-slash paths if they were UNC-style paths like `\\tajiri\team\steve` -- going back and adding the same logic to a dozen different file handling functions would be tedious and an invitation to bugs, while fixing a single decorator function would be far quicker, easier and safer.
+
+Decorators are a very powerful tool for enforcing consistency across functions which are otherwise independent of each other.  For example, a Maya library that dealt with geometry could use a decorator to make sure that it's functions transparently found the shapes associated with transform arguments in a robust and reliable way instead of forcing dozens of functions to use similar but not-quite-identical ways to find the geometry.  Or, a file exporter could use decorators to make it easy to provide common logging and error handling for the many individual operations that make up an export. Whenever you're faced with the problem of coordinating similar behavior across a large range of functions (or even of classes -- classes can be decorated too) decorators are an excellent tool, offering the standardization that other languages get from class hierarchies without the accompanying complexity.
