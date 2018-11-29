@@ -464,6 +464,72 @@ Python decorators are a powerful tool for making simpler code. A decorator is ba
 
 ```
 
-This would allow you to take a bunch of file management functions and ensure they all returned right-slashed pathnames instead of left-slashed ones on windows.  You could of course do the same thing by doing the replace operation in every one of the functions, but the decorator version has two key advantages. First, it *spells out its own intentions clearly& -- it promises the reader that a function will (in this example) return a certain kind of data. Second, it's easily extensible.  Say you discovered that you did not want to right-slash paths if they were UNC-style paths like `\\tajiri\team\steve` -- going back and adding the same logic to a dozen different file handling functions would be tedious and an invitation to bugs, while fixing a single decorator function would be far quicker, easier and safer.
+This would allow you to take a bunch of file management functions and ensure they all returned right-slashed pathnames instead of left-slashed ones on windows.  You could of course do the same thing by doing the replace operation in every one of the functions, but the decorator version has two key advantages. First, it *spells out its own intentions clearly* -- it promises the reader that a function will (in this example) return a certain kind of data. Second, it's *easily extensible*.  Say you discovered that you did not want to right-slash paths if they were UNC-style paths like `\\tajiri\team\steve` -- going back and adding the same logic to a dozen different file handling functions would be tedious and an invitation to bugs, while fixing a single decorator function would be far quicker, easier and safer. 
 
 Decorators are a very powerful tool for enforcing consistency across functions which are otherwise independent of each other.  For example, a Maya library that dealt with geometry could use a decorator to make sure that it's functions transparently found the shapes associated with transform arguments in a robust and reliable way instead of forcing dozens of functions to use similar but not-quite-identical ways to find the geometry.  Or, a file exporter could use decorators to make it easy to provide common logging and error handling for the many individual operations that make up an export. Whenever you're faced with the problem of coordinating similar behavior across a large range of functions (or even of classes -- classes can be decorated too) decorators are an excellent tool, offering the standardization that other languages get from class hierarchies without the accompanying complexity.
+
+# The proper uses of magic
+
+Python has a high magic quotient; you can change a lot about the behavior of basic Python entities, allowing you to customize many aspects of how your code looks and acts.  In the right circumstances this is a very powerful tool: you can write code that more clearly and concisely expresses its intent if you know how to use advanced techniques.  However, this is a power that should be used _sparingly_: it's very easy for a system to become so sophisticated that  it's incomprehensible to any one except the author -- or, sometimes, _including_ the author once a few months have passed.
+
+There's no hard and fast rule to knowing when the time for magic has come, but a good rule of thumb to start with is actually aesthetic.  Consider the case of a class that acts as a vector for vector math:
+
+```
+class Vector (object):
+    def __init__(self, x, y, z):
+        self.x = x
+        self.y = y
+        self.z = z
+
+    def add_in_place(self, othervector):
+        self.x += othervector.x
+        self.y += othervector.y
+        self.z += othervector.z
+
+    @classmethod
+    def add (cls, vector1, vector2):
+        return Vector (vector1.x + vector2.x, vector1.y + vector2.y, vector1.z + vector2.z)
+
+    # imagine similar methods for subtraction, multiplication and so on...
+
+v1 = Vector (1, 2, 3)
+v1.add_in_place(Vector(4,5,6))
+# Vector(5,7,9)
+
+v2 = Vector.add(v1, Vector (4, 2, 0))
+# Vector(9,9,9)
+
+```
+        
+This works pretty well -- but it violates a basic expectation for vector math, namely, that you can use standard mathematical notations (with all the other things they imply, like order of operations, commutation, and so on). Here a small investment in 'magic' makes sense:
+
+```
+class Vector (object):
+    def __init__(self, x, y, z):
+        self.x = x
+        self.y = y
+        self.z = z
+
+    # inplace addition
+    def __iadd__(self, othervector):
+        self.x += othervector.x
+        self.y += othervector.y
+        self.z += othervector.z
+
+    # addition
+    def __add__ (self,  vector2):
+        return Vector (self.x + vector2.x, self.y + vector2.y, self.z + vector2.z)
+
+    # there are similar magic methods for subraction, multiplication etc.
+
+v1 = Vector (1, 2, 3)
+v1 += Vector(4, 5, 6)
+v2 = v1 + Vector(4, 2, 0) 
+```
+
+The functional part of the code is no different but this class operates in an appropriate problem space.  The win in readability is strong, but the underlying relationships are still easy to parse.  That's some white magic.
+
+On the other hand there are times when the magic is too deep and you risk tangling with Things Better Left Alone. Python [metaclasses](https://jakevdp.github.io/blog/2012/12/01/a-primer-on-python-metaclasses/) earned this quote for a reason:
+> “Metaclasses are deeper magic than 99% of users should ever worry about. If you wonder whether you need them, you don’t (the people who actually need them know with certainty that they need them, and don’t need an explanation about why).” — Tim Peters
+
+There really are legit applications for metaclasses, but they are rare (and often, the temptation to find uses coincides a bit too much with learning about metaclasses for the first time).  If you're considering a metaclass -- or other highly involved techniques like runtime [monkey-patching]() or 
