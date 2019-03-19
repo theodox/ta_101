@@ -124,7 +124,7 @@ Don't.
 
 We need to _think_ about future problems and try to solve today's issues without prejudicing future enhancements. But we don't want to actually write code that we don't need right now.  
 
-The hard truth of TA life is that the future we are envisioning may not ever arrive, or will arrive in an almost unrecognizable form.  So, don't do work today to solve a problem that may never come to pass.
+The hard truth of TA life is that the future we are envisioning may not ever arrive, or will arrive in an almost unrecognizable form.  So, **don't do work today to solve a problem that may never come to pass**.
 
 An idea for how to solve a future problem is a great note to put into a comment or @todo.  But don't write future code until it serves a present need.  Long-lived library and especially framework code need to be more future-friendly.  However, even there it's a good idea to write as little code as is practical today.
 
@@ -141,7 +141,7 @@ We also want to retire code that's not serving a purpose any longer.  It's all b
 
 TA work makes it hard to completely embrace [test-driven development]().  Because a lot of TA work happens inside complex environments that we don't control from end to end, it's hard to hit 100% test coverage without a lot of work.
 
-However, tests are still an extremely valuable tool.  Tests are particularly important if we want to make refactoring a regular, ongoing part of our work: refactoring is a far less scary prospect when you have tests which demonstrate that moving a file or renaming a method has not created surprising sideffects.
+However, tests are still an extremely valuable tool.  Tests are particularly important if we want to make refactoring a regular, ongoing part of our work: refactoring is a far less scary prospect when you have tests which demonstrate that moving a file or renaming method, or even fixing a bug has not created surprising sideffects.
 
 Another very important benefit of tests is that testing encourages good design.  Testable code is generally going to be less complicated, less overly coupled, and less prone to wierd side effect bugs.  [This talk](https://youtu.be/DJtef410XaM) is Python specific but it lays out the case for why testing makes for better code structure overall very well -- and the idea that he's actually propunding originated in Java. 
 
@@ -260,12 +260,30 @@ Unfortunately, since most of of our python is written inside of Maya we are ofte
 
 ## Tools for simplification
 
+### Modules
+
+Modules are a vital tool for keeping python code organized.  Keeping related code together in a well-named module allows for a good mix of descriptive names wihout redundancy.  Good modules reduce the need for extremely long function names, and allow for more flexibility in layout
+
+    import texture_tools
+    texture_tools.get_uvs_fom_selected()
+
+and 
+
+    import uvs
+    uvs.from_selected()
+
+Don't write a class just to create a holder for methods  -- make a nested python module instead. 
+
+Python modules are also the right way to handle shared state which in other languages requires a singleton.  For example, you might want to have project related code for managing data about your working environment.  You would not want different parts of the same application to disagree about that kind of data.  In Python delegate that code to a module instead of trying to write a singleton class:  Modules are globally accessible, only run their own code once, and they are 'singletons' by default.  
+
+In general, "singleton" style shared state is something to avoid whenever possible in any case.  Too much shared state makes it too easy for bugs to crop up in untraceable ways.  However when you do need to share information, use the module mechanism as the easy, Pythonic way to maintain shared data.
+
+
 ### Try-Except-Finally
 
 `try` and `except` are basic parts of Python.  Their lesser-known sibling `finally` however is a very powerful tool for writing cleaner code.  The basic structure is :
 
     try:
-        setup()
         do_something()
     except:
         handle_problems()
@@ -352,7 +370,7 @@ class Namespace(str):
 ```
 
 
-That's a few more lines to write -- once.  But once it's written all other namespace jobs can handled much more cleanly:
+That's a quite a few more lines to write -- but once it's written all other namespace jobs can handled much more cleanly:
 
     with Namespace('my_namespace'):
         # do work in 'my_namespace',
@@ -432,15 +450,6 @@ Here, the closure allows the increment and decrement buttons to know which field
 
 Closures are particularly attractive because they are space efficient -- however you do need to avoid going too deep, or your readers may not be able to figure out where your variable names are coming from. If you are inheriting a variable several screens away from where it originates, at least leave a comment indicating where the name comes from. The `ALLCAPS` convention for module-level constants is also a good way to remind readers when they may be seeing a closure variable.
 
-### Modules, not singletons
-
-> Note to self; move this up, and make 'modules' a separate top level header in the toolkit with a note about modules-as-namespaces and not using classes-as-namespaces
-
-In many languages it's valuable to create a singleton -- an object which is intended to be shared between many different uses.  For example, you might want to have a 'project' singleton which contained information about your working environment so that all you code knows about where to find certain kinds of information.  You would not want different parts of the same application to disagree about that kind of data, so you'd use a singleton to ensure that all project-related code was always in sync.
-
-Python does not need singletons.  If you want to maintain a single globally acccessible set of information for all possible callers, just use a module. Use module-level functions to get and set data in the module.  All users will receive the same data and none of the various elaborate hacks that people have tried to force Python classes to behave like singletons will be needed.
-
-In general, "singleton" style shared state is something to avoid whenever possible in any case.  Too much shared state makes it too easy for bugs to crop up in untraceable ways.  However when you do need to share information, use the module mechanism as the easy, Pythonic way to maintain shared data.
 
 ### decorators
 
@@ -464,9 +473,13 @@ Python decorators are a powerful tool for making simpler code. A decorator is ba
 
 ```
 
-This would allow you to take a bunch of file management functions and ensure they all returned right-slashed pathnames instead of left-slashed ones on windows.  You could of course do the same thing by doing the replace operation in every one of the functions, but the decorator version has two key advantages. First, it *spells out its own intentions clearly* -- it promises the reader that a function will (in this example) return a certain kind of data. Second, it's *easily extensible*.  Say you discovered that you did not want to right-slash paths if they were UNC-style paths like `\\tajiri\team\steve` -- going back and adding the same logic to a dozen different file handling functions would be tedious and an invitation to bugs, while fixing a single decorator function would be far quicker, easier and safer. 
+This would allow you to take a bunch of file management functions and ensure they all returned right-slashed pathnames instead of left-slashed ones on windows.  
+
+You could of course do the same thing by doing the replace operation in every one of the functions, but the decorator version has two key advantages. First, it *spells out its own intentions clearly* -- it promises the reader that a function will (in this example) return a certain kind of data. Second, it's *easily extensible*.  Say you discovered that you did not want to right-slash paths if they were UNC-style paths like `\\tajiri\team\steve` -- going back and adding the same logic to a dozen different file handling functions would be tedious and an invitation to bugs, while fixing a single decorator function would be far quicker, easier and safer. 
 
 Decorators are a very powerful tool for enforcing consistency across functions which are otherwise independent of each other.  For example, a Maya library that dealt with geometry could use a decorator to make sure that it's functions transparently found the shapes associated with transform arguments in a robust and reliable way instead of forcing dozens of functions to use similar but not-quite-identical ways to find the geometry.  Or, a file exporter could use decorators to make it easy to provide common logging and error handling for the many individual operations that make up an export. Whenever you're faced with the problem of coordinating similar behavior across a large range of functions (or even of classes -- classes can be decorated too) decorators are an excellent tool, offering the standardization that other languages get from class hierarchies without the accompanying complexity.
+
+The one thing to remember about decorators is that they shouldn't interfere with readability:  a decorator that automatically right-slashes file names won't surprise readers, but one which causes a function that looks like it returns string to return numbers instead will generate a lot of confusion.
 
 # The proper uses of magic
 
@@ -532,4 +545,4 @@ The functional part of the code is no different but this class operates in an ap
 On the other hand there are times when the magic is too deep and you risk tangling with Things Better Left Alone. Python [metaclasses](https://jakevdp.github.io/blog/2012/12/01/a-primer-on-python-metaclasses/) earned this quote for a reason:
 > “Metaclasses are deeper magic than 99% of users should ever worry about. If you wonder whether you need them, you don’t (the people who actually need them know with certainty that they need them, and don’t need an explanation about why).” — Tim Peters
 
-There really are legit applications for metaclasses, but they are rare (and often, the temptation to find uses coincides a bit too much with learning about metaclasses for the first time).  If you're considering a metaclass -- or other highly involved techniques like runtime [monkey-patching]() or 
+There really are legit applications for metaclasses, but they are rare (and often, the temptation to find uses coincides a bit too much with learning about metaclasses for the first time).  If you're considering a metaclass -- or other highly involved techniques like runtime [monkey-patching]() -- be sure you're actually solving the problem and not embracing cleverness for its own sake.
