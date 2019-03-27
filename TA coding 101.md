@@ -80,7 +80,7 @@ Library code resembles framework code in one way: it's still far away from the u
 
 Good libraries are easy to spot: they make it easy to do the right thing and hard to do the wrong thing.  [This talk](https://youtu.be/5tg1ONG18H8) is nominally about C++, but it's a good discussion of the ways api design and UX design are similar in any language.  Libraries should be designed for simplicity, consistency and lack of surprises.
 
-### Tools.
+### Tools
 
 Tools are the parts of our work that are visible to our users -- this is where the menus, buttons, dialogs and scripts go.  Tool coode marshals the functionality from our frameworks and libraries into a user-friendly package that's easy to maintain and support.  
 
@@ -124,7 +124,7 @@ Don't.
 
 We need to _think_ about future problems and try to solve today's issues without prejudicing future enhancements. But we don't want to actually write code that we don't need right now.  
 
-The hard truth of TA life is that the future we are envisioning may not ever arrive, or will arrive in an almost unrecognizable form.  So, don't do work today to solve a problem that may never come to pass.
+The hard truth of TA life is that the future we are envisioning may not ever arrive, or will arrive in an almost unrecognizable form.  So, **don't do work today to solve a problem that may never come to pass**.
 
 An idea for how to solve a future problem is a great note to put into a comment or @todo.  But don't write future code until it serves a present need.  Long-lived library and especially framework code need to be more future-friendly.  However, even there it's a good idea to write as little code as is practical today.
 
@@ -141,7 +141,7 @@ We also want to retire code that's not serving a purpose any longer.  It's all b
 
 TA work makes it hard to completely embrace [test-driven development]().  Because a lot of TA work happens inside complex environments that we don't control from end to end, it's hard to hit 100% test coverage without a lot of work.
 
-However, tests are still an extremely valuable tool.  Tests are particularly important if we want to make refactoring a regular, ongoing part of our work: refactoring is a far less scary prospect when you have tests which demonstrate that moving a file or renaming a method has not created surprising sideffects.
+However, tests are still an extremely valuable tool.  Tests are particularly important if we want to make refactoring a regular, ongoing part of our work: refactoring is a far less scary prospect when you have tests which demonstrate that moving a file or renaming method, or even fixing a bug has not created surprising sideffects.
 
 Another very important benefit of tests is that testing encourages good design.  Testable code is generally going to be less complicated, less overly coupled, and less prone to wierd side effect bugs.  [This talk](https://youtu.be/DJtef410XaM) is Python specific but it lays out the case for why testing makes for better code structure overall very well -- and the idea that he's actually propunding originated in Java. 
 
@@ -243,14 +243,16 @@ Understudies can, and should, remind implementers if there is existing functiona
 
 In many cases -- particularly for more complex jobs -- the understudy will also be working on the same code.  In cases like that the two roles should basically be reversed as needed:  A understudies B's work and vice-versa.  
 
-Style notes
-============
+
+
+Appendix 1: Style nots
+-----------
 
 This section is going to be a bit subjective, and is not intended to be enforced as 'rules'.  It's a set of style considerations to consider when you are designing new code structures.  
 
 
-Appendix 1: Python style
-===========
+House Python Style
+=================
 
 First and foremost, think about how Python wants to be written.  Simplicity and readability are key values in python code.  There's a reason a lot of core Python developers use the word 'beautiful' a lot when talking about programming.
 
@@ -260,12 +262,30 @@ Unfortunately, since most of of our python is written inside of Maya we are ofte
 
 ## Tools for simplification
 
+### Modules
+
+Modules are a vital tool for keeping python code organized.  Keeping related code together in a well-named module allows for a good mix of descriptive names wihout redundancy.  Good modules reduce the need for extremely long function names, and allow for more flexibility in layout
+
+    import texture_tools
+    texture_tools.get_uvs_fom_selected()
+
+and 
+
+    import uvs
+    uvs.from_selected()
+
+Don't write a class just to create a holder for methods  -- make a nested python module instead. 
+
+Python modules are also the right way to handle shared state which in other languages requires a singleton.  For example, you might want to have project related code for managing data about your working environment.  You would not want different parts of the same application to disagree about that kind of data.  In Python delegate that code to a module instead of trying to write a singleton class:  Modules are globally accessible, only run their own code once, and they are 'singletons' by default.  
+
+In general, "singleton" style shared state is something to avoid whenever possible in any case.  Too much shared state makes it too easy for bugs to crop up in untraceable ways.  However when you do need to share information, use the module mechanism as the easy, Pythonic way to maintain shared data.
+
+
 ### Try-Except-Finally
 
 `try` and `except` are basic parts of Python.  Their lesser-known sibling `finally` however is a very powerful tool for writing cleaner code.  The basic structure is :
 
     try:
-        setup()
         do_something()
     except:
         handle_problems()
@@ -352,7 +372,7 @@ class Namespace(str):
 ```
 
 
-That's a few more lines to write -- once.  But once it's written all other namespace jobs can handled much more cleanly:
+That's a quite a few more lines to write -- but once it's written all other namespace jobs can handled much more cleanly:
 
     with Namespace('my_namespace'):
         # do work in 'my_namespace',
@@ -360,6 +380,8 @@ That's a few more lines to write -- once.  But once it's written all other names
         # when done
 
 Formally you could do the same work in `try-except-finally` structure and be guaranteed to get the same results.  From a readability standpoint, however, the `Namespace` context manager is a big win -- it takes a series of steps that are all related, all necessary, and all pretty common in Maya programming and renders them both safe and easily readable at the same time.
+
+You may note that `with` blocks have a generic similarity to `try-except-finally` constructs.  Generally the former are best for things you have to do a lot, like namespaces and the latter are the fallback for one-offs.
 
 ### Closures
 
@@ -432,15 +454,88 @@ Here, the closure allows the increment and decrement buttons to know which field
 
 Closures are particularly attractive because they are space efficient -- however you do need to avoid going too deep, or your readers may not be able to figure out where your variable names are coming from. If you are inheriting a variable several screens away from where it originates, at least leave a comment indicating where the name comes from. The `ALLCAPS` convention for module-level constants is also a good way to remind readers when they may be seeing a closure variable.
 
-### Modules, not singletons
+### lists, tuples and dictionaries
 
-> Note to self; move this up, and make 'modules' a separate top level header in the toolkit with a note about modules-as-namespaces and not using classes-as-namespaces
+Collections are the heart of Python programming -- they're super useful and reduce a ton of the boring boilerplate common in other languages.
 
-In many languages it's valuable to create a singleton -- an object which is intended to be shared between many different uses.  For example, you might want to have a 'project' singleton which contained information about your working environment so that all you code knows about where to find certain kinds of information.  You would not want different parts of the same application to disagree about that kind of data, so you'd use a singleton to ensure that all project-related code was always in sync.
+It's important to get good use out of them, which means a couple of basic things:
 
-Python does not need singletons.  If you want to maintain a single globally acccessible set of information for all possible callers, just use a module. Use module-level functions to get and set data in the module.  All users will receive the same data and none of the various elaborate hacks that people have tried to force Python classes to behave like singletons will be needed.
+#### Use idiomatic looping
 
-In general, "singleton" style shared state is something to avoid whenever possible in any case.  Too much shared state makes it too easy for bugs to crop up in untraceable ways.  However when you do need to share information, use the module mechanism as the easy, Pythonic way to maintain shared data.
+ `for item in my_list: `  for most loops and `for index, value in enumerate(my_list)` if you need the indices, not `for i in range(len(my_list))):`
+
+For dictionaries, prefer `for item in my_dict` for most things, and `for item in my_dict.keys()` if you might be adding or removing entries in the loop.
+
+#### List comprehension are great -- if comprehensible
+
+Most of the time `my_list = [x for x in range(100) if x %2 ==0]`  is better than a for loop.  However if you're finding it hard to fit a comprehension onto a single like it's probably too complex and ought to revert to being a loop.
+
+#### Prefer tuples to lists if you can
+
+Tuples are slightly faster than lists, and they have less overhead if you don't expect their contents to change.  Whenever you're simply answering a question like "what are the objects in this Maya scene using this shader" -- it's better to return a tuple instead of a list, since it's the correct answer now and user's can't accidentally change it.  There's no way to, say, try to change a tuple while loopong over it.
+
+Tuples are also faster to create as literals.  List initializers are fast:
+
+    data = ['a', 'b', 'c']
+
+but tuple literals are faster:
+
+    tuple = 'a', 'b', 'c'
+
+(Note that it's the _commas_, not the parens, which define a tuple)
+
+So for kind of constant tuples are better
+
+Tuples can also be used as keys in a dictionary, where lists cannot.  So you could for example represent something like a chessboard as dictionary using tuples as keys:
+
+    Chessboard = {(0,0): 'Rook', (0,1), 'Pawn', ... }
+
+This is much more efficient than having an actual nested 2-d array to represent the board.
+
+#### Prefer namedtuples to tuples for structured data
+
+`(collections.namedtuple)[https://pymotw.com/2/collections/namedtuple.html]` offers an excellent alternative to dictionaries and custom classes for structured data.  It's far better to write
+
+    if person.age > 21:
+
+than 
+
+     if person[7] > 21
+
+ namedtuples make for more readable code with very little work.  They are also cheaper than dictionaries and -- being immutable, like tuples -- they are less prone to accidental mutations.
+
+#### Dictionary idioms
+
+Dictionaries are one of Python's best features -- an excellent way to handle information flexibly. Using them idiomatically is a key to good Python style:
+
+* Don't forget about dictionary comprehensions:  {k: v  for k, v in zip(keys, values)}
+* Check for inclusion with `if value in my_dict`.
+* Loop over the keys and vales together with `for key, value in my_dict.items()` (or `.iteritems()` to save memory).
+* Use `my_dict.get(key, fallback_value)` rather than checking to see if a key already exists.  Use `my_dict.setdefault(key, value)` to do the same thing _and_ to ensure that the key is present in future.
+* Remove dictionary keys and values with `del my_dict[key]`, but get-and-remove in one operation with `my_dict.pop(key)`  using `del` makes it clear that you intend to remove a key
+* Use `[collections.defaultdict](https://docs.python.org/2/library/collections.html#collections.defaultdict)` if you have to do a lot of checking to see if a dictionary already has what you need instead of hand-writing an if-check.  
+
+Dictionaries make a very useful alternative to long string of `if - elif - else` comparisons, particularly if you're routing to different code based on some value.  For example if you were tring to choose between  handler functions based on a selector string:
+
+     options = {
+        'a': a_handler,
+        'b': b_handler,
+        'c': c_handler
+     }
+     func = options.get(selector, fallback_handler)
+     func()
+
+is more compact and easier to extend than
+
+    if selector == 'a':
+        a_handler()
+    elif selector == 'b':
+        b_handler()
+    elif selector == 'c':
+        c_handler()
+    else:
+        fallback_handler()
+
 
 ### decorators
 
@@ -464,9 +559,13 @@ Python decorators are a powerful tool for making simpler code. A decorator is ba
 
 ```
 
-This would allow you to take a bunch of file management functions and ensure they all returned right-slashed pathnames instead of left-slashed ones on windows.  You could of course do the same thing by doing the replace operation in every one of the functions, but the decorator version has two key advantages. First, it *spells out its own intentions clearly* -- it promises the reader that a function will (in this example) return a certain kind of data. Second, it's *easily extensible*.  Say you discovered that you did not want to right-slash paths if they were UNC-style paths like `\\tajiri\team\steve` -- going back and adding the same logic to a dozen different file handling functions would be tedious and an invitation to bugs, while fixing a single decorator function would be far quicker, easier and safer. 
+This would allow you to take a bunch of file management functions and ensure they all returned right-slashed pathnames instead of left-slashed ones on windows.  
+
+You could of course do the same thing by doing the replace operation in every one of the functions, but the decorator version has two key advantages. First, it *spells out its own intentions clearly* -- it promises the reader that a function will (in this example) return a certain kind of data. Second, it's *easily extensible*.  Say you discovered that you did not want to right-slash paths if they were UNC-style paths like `\\tajiri\team\steve` -- going back and adding the same logic to a dozen different file handling functions would be tedious and an invitation to bugs, while fixing a single decorator function would be far quicker, easier and safer. 
 
 Decorators are a very powerful tool for enforcing consistency across functions which are otherwise independent of each other.  For example, a Maya library that dealt with geometry could use a decorator to make sure that it's functions transparently found the shapes associated with transform arguments in a robust and reliable way instead of forcing dozens of functions to use similar but not-quite-identical ways to find the geometry.  Or, a file exporter could use decorators to make it easy to provide common logging and error handling for the many individual operations that make up an export. Whenever you're faced with the problem of coordinating similar behavior across a large range of functions (or even of classes -- classes can be decorated too) decorators are an excellent tool, offering the standardization that other languages get from class hierarchies without the accompanying complexity.
+
+The one thing to remember about decorators is that they shouldn't interfere with readability:  a decorator that automatically right-slashes file names won't surprise readers, but one which causes a function that looks like it returns string to return numbers instead will generate a lot of confusion.
 
 # The proper uses of magic
 
@@ -532,4 +631,4 @@ The functional part of the code is no different but this class operates in an ap
 On the other hand there are times when the magic is too deep and you risk tangling with Things Better Left Alone. Python [metaclasses](https://jakevdp.github.io/blog/2012/12/01/a-primer-on-python-metaclasses/) earned this quote for a reason:
 > “Metaclasses are deeper magic than 99% of users should ever worry about. If you wonder whether you need them, you don’t (the people who actually need them know with certainty that they need them, and don’t need an explanation about why).” — Tim Peters
 
-There really are legit applications for metaclasses, but they are rare (and often, the temptation to find uses coincides a bit too much with learning about metaclasses for the first time).  If you're considering a metaclass -- or other highly involved techniques like runtime [monkey-patching]() or 
+There really are legit applications for metaclasses, but they are rare (and often, the temptation to find uses coincides a bit too much with learning about metaclasses for the first time).  If you're considering a metaclass -- or other highly involved techniques like runtime [monkey-patching](https://www.youtube.com/watch?v=ZpJxwpyJpq4) -- be sure you're actually solving the problem and not embracing cleverness for its own sake.
