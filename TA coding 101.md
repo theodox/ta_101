@@ -509,7 +509,7 @@ This is much more efficient than having an actual nested 2-d array to represent 
 
 #### Prefer namedtuples to tuples for structured data
 
-`(collections.namedtuple)[https://pymotw.com/2/collections/namedtuple.html]` offers an excellent alternative to dictionaries and custom classes for structured data.  It's far better to write
+(`collections.namedtuple`)[https://pymotw.com/2/collections/namedtuple.html] offers an excellent alternative to dictionaries and custom classes for structured data.  It's far better to write
 
     if person.age > 21:
 
@@ -528,7 +528,7 @@ Dictionaries are one of Python's best features -- an excellent way to handle inf
 * Loop over the keys and vales together with `for key, value in my_dict.items()` (or `.iteritems()` to save memory).
 * Use `my_dict.get(key, fallback_value)` rather than checking to see if a key already exists.  Use `my_dict.setdefault(key, value)` to do the same thing _and_ to ensure that the key is present in future.
 * Remove dictionary keys and values with `del my_dict[key]`, but get-and-remove in one operation with `my_dict.pop(key)`  using `del` makes it clear that you intend to remove a key
-* Use `[collections.defaultdict](https://docs.python.org/2/library/collections.html#collections.defaultdict)` if you have to do a lot of checking to see if a dictionary already has what you need instead of hand-writing an if-check.  
+* Use [`collections.defaultdict`](https://docs.python.org/2/library/collections.html#collections.defaultdict) if you have to do a lot of checking to see if a dictionary already has what you need instead of hand-writing an if-check.  
 
 Dictionaries make a very useful alternative to long string of `if - elif - else` comparisons, particularly if you're routing to different code based on some value.  For example if you were tring to choose between  handler functions based on a selector string:
 
