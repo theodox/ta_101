@@ -121,7 +121,7 @@ Don't.
 
 We need to _think_ about future problems and try to solve today's issues without prejudicing future enhancements. But we don't want to actually write code that we don't need right now.  
 
-The hard truth of TA life is that the future we are envisioning may not ever arrive, or will arrive in an almost unrecognizable form.  So, don't do work today to solve a problem that may never come to pass.
+The hard truth of TA life is that the future we are envisioning may not ever arrive, or will arrive in an almost unrecognizable form.  So, **don't do work today to solve a problem that may never come to pass**.
 
 An idea for how to solve a future problem is a great note to put into a comment or @todo.  But don't write future code until it serves a present need.  Long-lived library and especially framework code need to be more future-friendly.  However, even there it's a good idea to write as little code as is practical today.
 
@@ -138,9 +138,7 @@ We also want to retire code that's not serving a purpose any longer.  It's all b
 
 TA work makes it hard to completely embrace [test-driven development](https://news.codecademy.com/test-driven-development/).  Because a lot of TA work happens inside complex environments that we don't control from end to end, it's hard to hit 100% test coverage without a lot of work.
 
-> Todo: add an appendix about viable - minimal TDD setups for Maya and Unreal
-
-However, tests are still an extremely valuable tool.  Tests are particularly important if we want to make refactoring a regular, ongoing part of our work: refactoring is a far less scary prospect when you have tests which demonstrate that moving a file or renaming a method has not created surprising side effects.
+However, tests are still an extremely valuable tool.  Tests are particularly important if we want to make refactoring a regular, ongoing part of our work: refactoring is a far less scary prospect when you have tests which demonstrate that moving a file or renaming method, or even fixing a bug has not created surprising sideffects.
 
 Another very important benefit of tests is that testing encourages good design.  Testable code is generally going to be less complicated, less overly coupled, and less prone to wierd side effect bugs.  [This talk](https://youtu.be/DJtef410XaM) is Python specific but it lays out the case for why testing makes for better code structure overall very well -- and the idea that he's actually propounding originated in Java. 
 
@@ -260,3 +258,392 @@ Nothing is done unless it's readably commented (for other coders) and documented
 
 In many cases -- particularly for more complex jobs -- the understudy will also be working on the same code.  In cases like that the two roles should basically be reversed as needed:  A understudies B's work and vice-versa.  
 
+
+
+Appendix 1: Style nots
+-----------
+
+This section is going to be a bit subjective, and is not intended to be enforced as 'rules'.  It's a set of style considerations to consider when you are designing new code structures.  
+
+
+House Python Style
+=================
+
+First and foremost, think about how Python wants to be written.  Simplicity and readability are key values in python code.  There's a reason a lot of core Python developers use the word 'beautiful' a lot when talking about programming.
+
+Unfortunately, since most of of our python is written inside of Maya we are often writing agains an API  that is neither very simple nor very readable. Everybody who works with Maya has had to write countless variations on `cmds.getAttr(object_name + '.property')` or `cmds.editDisplayLayerMembers( 'displayLayer1', query=True)`.  Neither line is a big deal -- but both impose an incremental tax on your thought process, particularly when you're reading a long, complex piece code where the Maya mechanics are main point. When you first learn Maya the challenge is simply getting things working and that kind of very explicit step-by-step code is part of the learning process. When you're more senior, you will start seeing opportunities to clean up and clarify the chattiness and clutter of the Maya api.
+
+> [This talk](https://www.youtube.com/watch?v=wf-BqAjZb8M) is a really good example of the thinking behind this section -- it's from a Python core developer explaining how to 'Pythonify' an api that was written for another language mindset.  It's a natural analogy for how we relate to Maya.
+
+## Tools for simplification
+
+### Modules
+
+Modules are a vital tool for keeping python code organized.  Keeping related code together in a well-named module allows for a good mix of descriptive names wihout redundancy.  Good modules reduce the need for extremely long function names, and allow for more flexibility in layout
+
+    import texture_tools
+    texture_tools.get_uvs_fom_selected()
+
+and 
+
+    import uvs
+    uvs.from_selected()
+
+Don't write a class just to create a holder for methods  -- make a nested python module instead. 
+
+Python modules are also the right way to handle shared state which in other languages requires a singleton.  For example, you might want to have project related code for managing data about your working environment.  You would not want different parts of the same application to disagree about that kind of data.  In Python delegate that code to a module instead of trying to write a singleton class:  Modules are globally accessible, only run their own code once, and they are 'singletons' by default.  
+
+In general, "singleton" style shared state is something to avoid whenever possible in any case.  Too much shared state makes it too easy for bugs to crop up in untraceable ways.  However when you do need to share information, use the module mechanism as the easy, Pythonic way to maintain shared data.
+
+
+### Try-Except-Finally
+
+`try` and `except` are basic parts of Python.  Their lesser-known sibling `finally` however is a very powerful tool for writing cleaner code.  The basic structure is :
+
+    try:
+        do_something()
+    except:
+        handle_problems()
+    finally:
+        clean_up_after_yourself()
+
+In a `try/except/finally` block the code in the `finally` section is guaranteed to execute whether or not the `try` block raised an exception.  This is important because it allows you to handle cleanup tasks knowing that they will execute regardless of whether or not the code above them succeeded or failed.  Consider something like this:
+
+    try:
+       output = open('filename', 'wt')
+       output.write( 99 / x)
+       output.close()
+    except IOError:
+        print "could not open file"
+
+This looks OK -- the code correctly handles a case where, say, 'filename' is write-locked.  However if the variable `x` is zero, the code will fail with an uncaught `ZeroDivisionError` and the file handle will be left open, which will leave an undeletable file on disk until the python interpreter is forcibly closed.  A `finally` block will make sure that the cleanup happens no matter what:
+
+    try:
+        output = open('filename', 'wt')
+        output.write( 99 / x)
+    except IOError:
+        print "could not open file"
+    finally:
+        output.close()
+
+In this version, `output` will be properly closed no matter what else happens.  In Maya programming this is often a vital tool for making sure that the scene is restored to a legitimate state if one of your tool operations goes awry.
+
+### Context managers
+
+A variant on the same theme is the context manager: the Python construct that start with `with`.  A context manager is an excellent way package up work that has a defined beginning, middle and end in a readable, but also safe way.
+
+For example, Maya wants you to do this to create and work in a new namespace:
+
+     cmds.namespace(set = ":")  
+     #  you have to go back to the root namespace, or you'll create a child
+     cmds.namespace(add = 'new_ns')
+     cmds.namespace(set = 'new_ns')
+     
+     # ... do work here ...
+     cmds.namespace(set = ":")  
+
+     # return to root, or other work will be done in your namespace 
+
+This is all very simple, and maya vets don't think it's a big deal.  However, for four lines of boilerplate it has four significant weaknesses:
+
+1. If you forget to reset the namespace at the top, the rest of the code will quietly produce data in the wrong place
+2. If you mistype the namespace in the second or third lines, the code will fail. Because the typo is in a string, you won't know it until runtime.
+3. If you forget the reset the namespace at the end of the block, you'll be changing the behavior of all the code that runs after this.
+4. If the work code raises an exception, the namespace won't be reset and all future code will also fail.
+
+Luckily Python has a great native mechanism for dealing with this kind of setup->work->cleanup paradigm: the `with` statement.  It's not a lot of work to create a context manager that handles the boilerplate above:
+
+```
+import maya.cmds as cmds
+class Namespace(str):
+    def __init__(self, name):
+        self._name = name
+        self.last_namespace = None
+        self.namespace = None
+
+    def __enter__(self):
+        self.last_namespace = ":" + cmds.namespaceInfo(cur=True, fn=True)
+        
+        if self._name.startswith(":"):
+            should_add = not cmds.namespace(exists = self._name)
+        else:        
+            should_add = self._name not in (cmds.namespaceInfo(lon=True, sn=True) or [])
+            
+        if should_add:
+            cmds.namespace(add = self._name)
+        cmds.namespace(set = self._name)
+        self.namespace =  ":" + cmds.namespaceInfo(cur=True, fn = True)
+        return self
+
+    def __exit__(self, *exception):
+        cmds.namespace(set = self.last_namespace)
+        return False  
+        
+    def __str__(self):
+        return self.namespace or 'invalid-namespace' 
+
+    def __repr__(self):
+        return 'Namespace("' + self.namespace  + '")' or 'Namespace(" + self.name + ")'
+```
+
+
+That's a quite a few more lines to write -- but once it's written all other namespace jobs can handled much more cleanly:
+
+    with Namespace('my_namespace'):
+        # do work in 'my_namespace',
+        # and return to whatever namespace you were in
+        # when done
+
+Formally you could do the same work in `try-except-finally` structure and be guaranteed to get the same results.  From a readability standpoint, however, the `Namespace` context manager is a big win -- it takes a series of steps that are all related, all necessary, and all pretty common in Maya programming and renders them both safe and easily readable at the same time.
+
+You may note that `with` blocks have a generic similarity to `try-except-finally` constructs.  Generally the former are best for things you have to do a lot, like namespaces and the latter are the fallback for one-offs.
+
+### Closures
+
+Python [closures](https://www.programiz.com/python-programming/closure) are a very important tool for sharing data without the need for elaborate class structures.  The rules have some interesting subtleties, but basically they boil down to this:
+
+1. When you create a new scope -- a function or a class -- it automatically inherits the names defined in its current scope. If you declare a variable first and then declare a function right afterwards, that function gets access to that variable:
+```
+    test = "hello world"
+    def do_test():
+        print test
+    # hello world
+    print test   # here we're in the outer scope again
+    # hello world 
+```
+2. Names inherited via a closure can be _read_ (as in the above example), or _mutated_:
+```
+    test = {'hello': 'world'}
+    def do_test():
+        test['hello'] = 'sailor'
+        print test
+    # hello sailor
+    print test  # back to the outer scope -- the change sticks
+    # {'hello' : 'sailor'}
+```
+3. However, inherited names _cannot_ be re-assigned.  So, the obvious extension of the first example will not work as expected:
+```
+    test = "hello world"
+    def do_test():
+        test = 'hello sailor'
+        print test
+    # hello sailor
+    print test # back to the outer scope: no change!
+    # hello world
+```
+
+This key difference here that assignment (that is, the `=` operator) does not work its way back up the outer reference chain; instead it creates a new variable that masks the inherited version inside the local scope only. 
+
+The inheritance rule can be a bit intimidating, but closures are a very powerful tool for simplifying Python code particularly in a maya context.  Probably the best example is creating GUI, which often requires different widgets to know about each other.  Here's an example of a simple GUI that uses closures to let the different widgets communicate without the need for an elaborate class structure:
+
+```
+    def closure_window():
+        window = cmds.window(title ='closure example')
+        layout = cmds.columnLayout(adj=True)
+        rowLayout = cmds.rowLayout(nc=3)
+        increment = cmds.button(label = 'plus')
+        decrement = cmds.button(label = 'minus')
+        counter = cmds.intField()
+
+        def get_counter():
+            return cmds.intField(counter, q=True, v=True)
+
+        def set_counter (val):
+            cmds.intField(counter, e=True, v=val)
+
+        def add(_):
+            set_counter(get_counter() + 1)
+
+        def sub(_):
+            set_counter(get_counter() - 1)
+
+        cmds.button(increment, e=True, c=add)
+        cmds.button(decrement, e=True, c=sub)
+
+        cmds.showWindow(window)
+        return window
+
+```
+
+Here, the closure allows the increment and decrement buttons to know which field to affect even after the function has fired and the window has been created.  You could achieve the same effect with a class, using instance fields and instance methods to connect the different widgets together. In complicated cases that's still a good way to go. However closures provide many of the same benefits with much less overhead and should be part of your design process.  
+
+Closures are particularly attractive because they are space efficient -- however you do need to avoid going too deep, or your readers may not be able to figure out where your variable names are coming from. If you are inheriting a variable several screens away from where it originates, at least leave a comment indicating where the name comes from. The `ALLCAPS` convention for module-level constants is also a good way to remind readers when they may be seeing a closure variable.
+
+### lists, tuples and dictionaries
+
+Collections are the heart of Python programming -- they're super useful and reduce a ton of the boring boilerplate common in other languages.
+
+It's important to get good use out of them, which means a couple of basic things:
+
+#### Use idiomatic looping
+
+ `for item in my_list: `  for most loops and `for index, value in enumerate(my_list)` if you need the indices, not `for i in range(len(my_list))):`
+
+For dictionaries, prefer `for item in my_dict` for most things, and `for item in my_dict.keys()` if you might be adding or removing entries in the loop.
+
+#### List comprehension are great -- if comprehensible
+
+Most of the time `my_list = [x for x in range(100) if x %2 ==0]`  is better than a for loop.  However if you're finding it hard to fit a comprehension onto a single like it's probably too complex and ought to revert to being a loop.
+
+#### Prefer tuples to lists if you can
+
+Tuples are slightly faster than lists, and they have less overhead if you don't expect their contents to change.  Whenever you're simply answering a question like "what are the objects in this Maya scene using this shader" -- it's better to return a tuple instead of a list, since it's the correct answer now and user's can't accidentally change it.  There's no way to, say, try to change a tuple while loopong over it.
+
+Tuples are also faster to create as literals.  List initializers are fast:
+
+    data = ['a', 'b', 'c']
+
+but tuple literals are faster:
+
+    tuple = 'a', 'b', 'c'
+
+(Note that it's the _commas_, not the parens, which define a tuple)
+
+So for kind of constant tuples are better
+
+Tuples can also be used as keys in a dictionary, where lists cannot.  So you could for example represent something like a chessboard as dictionary using tuples as keys:
+
+    Chessboard = {(0,0): 'Rook', (0,1), 'Pawn', ... }
+
+This is much more efficient than having an actual nested 2-d array to represent the board.
+
+#### Prefer namedtuples to tuples for structured data
+
+`(collections.namedtuple)[https://pymotw.com/2/collections/namedtuple.html]` offers an excellent alternative to dictionaries and custom classes for structured data.  It's far better to write
+
+    if person.age > 21:
+
+than 
+
+     if person[7] > 21
+
+ namedtuples make for more readable code with very little work.  They are also cheaper than dictionaries and -- being immutable, like tuples -- they are less prone to accidental mutations.
+
+#### Dictionary idioms
+
+Dictionaries are one of Python's best features -- an excellent way to handle information flexibly. Using them idiomatically is a key to good Python style:
+
+* Don't forget about dictionary comprehensions:  {k: v  for k, v in zip(keys, values)}
+* Check for inclusion with `if value in my_dict`.
+* Loop over the keys and vales together with `for key, value in my_dict.items()` (or `.iteritems()` to save memory).
+* Use `my_dict.get(key, fallback_value)` rather than checking to see if a key already exists.  Use `my_dict.setdefault(key, value)` to do the same thing _and_ to ensure that the key is present in future.
+* Remove dictionary keys and values with `del my_dict[key]`, but get-and-remove in one operation with `my_dict.pop(key)`  using `del` makes it clear that you intend to remove a key
+* Use `[collections.defaultdict](https://docs.python.org/2/library/collections.html#collections.defaultdict)` if you have to do a lot of checking to see if a dictionary already has what you need instead of hand-writing an if-check.  
+
+Dictionaries make a very useful alternative to long string of `if - elif - else` comparisons, particularly if you're routing to different code based on some value.  For example if you were tring to choose between  handler functions based on a selector string:
+
+     options = {
+        'a': a_handler,
+        'b': b_handler,
+        'c': c_handler
+     }
+     func = options.get(selector, fallback_handler)
+     func()
+
+is more compact and easier to extend than
+
+    if selector == 'a':
+        a_handler()
+    elif selector == 'b':
+        b_handler()
+    elif selector == 'c':
+        c_handler()
+    else:
+        fallback_handler()
+
+
+### decorators
+
+Python decorators are a powerful tool for making simpler code. A decorator is basically just a way of wrapping a ordinary function to add some additional functionality.  For a toy example:
+
+```
+    def rightslash(original_function):
+        def right_slashed(*args):
+            result = original_function(*)
+            return result.replace('\\', '/')
+
+        return right_slashed
+
+    @rightslash
+    def working_directory():
+        return os.getcwd()
+
+    @rightslash
+    def parent_directory():
+        return os.path.dirname(__file__)
+
+```
+
+This would allow you to take a bunch of file management functions and ensure they all returned right-slashed pathnames instead of left-slashed ones on windows.  
+
+You could of course do the same thing by doing the replace operation in every one of the functions, but the decorator version has two key advantages. First, it *spells out its own intentions clearly* -- it promises the reader that a function will (in this example) return a certain kind of data. Second, it's *easily extensible*.  Say you discovered that you did not want to right-slash paths if they were UNC-style paths like `\\tajiri\team\steve` -- going back and adding the same logic to a dozen different file handling functions would be tedious and an invitation to bugs, while fixing a single decorator function would be far quicker, easier and safer. 
+
+Decorators are a very powerful tool for enforcing consistency across functions which are otherwise independent of each other.  For example, a Maya library that dealt with geometry could use a decorator to make sure that it's functions transparently found the shapes associated with transform arguments in a robust and reliable way instead of forcing dozens of functions to use similar but not-quite-identical ways to find the geometry.  Or, a file exporter could use decorators to make it easy to provide common logging and error handling for the many individual operations that make up an export. Whenever you're faced with the problem of coordinating similar behavior across a large range of functions (or even of classes -- classes can be decorated too) decorators are an excellent tool, offering the standardization that other languages get from class hierarchies without the accompanying complexity.
+
+The one thing to remember about decorators is that they shouldn't interfere with readability:  a decorator that automatically right-slashes file names won't surprise readers, but one which causes a function that looks like it returns string to return numbers instead will generate a lot of confusion.
+
+# The proper uses of magic
+
+Python has a high magic quotient; you can change a lot about the behavior of basic Python entities, allowing you to customize many aspects of how your code looks and acts.  In the right circumstances this is a very powerful tool: you can write code that more clearly and concisely expresses its intent if you know how to use advanced techniques.  However, this is a power that should be used _sparingly_: it's very easy for a system to become so sophisticated that  it's incomprehensible to any one except the author -- or, sometimes, _including_ the author once a few months have passed.
+
+There's no hard and fast rule to knowing when the time for magic has come, but a good rule of thumb to start with is actually aesthetic.  Consider the case of a class that acts as a vector for vector math:
+
+```
+class Vector (object):
+    def __init__(self, x, y, z):
+        self.x = x
+        self.y = y
+        self.z = z
+
+    def add_in_place(self, othervector):
+        self.x += othervector.x
+        self.y += othervector.y
+        self.z += othervector.z
+
+    @classmethod
+    def add (cls, vector1, vector2):
+        return Vector (vector1.x + vector2.x, vector1.y + vector2.y, vector1.z + vector2.z)
+
+    # imagine similar methods for subtraction, multiplication and so on...
+
+v1 = Vector (1, 2, 3)
+v1.add_in_place(Vector(4,5,6))
+# Vector(5,7,9)
+
+v2 = Vector.add(v1, Vector (4, 2, 0))
+# Vector(9,9,9)
+
+```
+        
+This works pretty well -- but it violates a basic expectation for vector math, namely, that you can use standard mathematical notations (with all the other things they imply, like order of operations, commutation, and so on). Here a small investment in 'magic' makes sense:
+
+```
+class Vector (object):
+    def __init__(self, x, y, z):
+        self.x = x
+        self.y = y
+        self.z = z
+
+    # inplace addition
+    def __iadd__(self, othervector):
+        self.x += othervector.x
+        self.y += othervector.y
+        self.z += othervector.z
+
+    # addition
+    def __add__ (self,  vector2):
+        return Vector (self.x + vector2.x, self.y + vector2.y, self.z + vector2.z)
+
+    # there are similar magic methods for subraction, multiplication etc.
+
+v1 = Vector (1, 2, 3)
+v1 += Vector(4, 5, 6)
+v2 = v1 + Vector(4, 2, 0) 
+```
+
+The functional part of the code is no different but this class operates in an appropriate problem space.  The win in readability is strong, but the underlying relationships are still easy to parse.  That's some white magic.
+
+On the other hand there are times when the magic is too deep and you risk tangling with Things Better Left Alone. Python [metaclasses](https://jakevdp.github.io/blog/2012/12/01/a-primer-on-python-metaclasses/) earned this quote for a reason:
+> “Metaclasses are deeper magic than 99% of users should ever worry about. If you wonder whether you need them, you don’t (the people who actually need them know with certainty that they need them, and don’t need an explanation about why).” — Tim Peters
+
+There really are legit applications for metaclasses, but they are rare (and often, the temptation to find uses coincides a bit too much with learning about metaclasses for the first time).  If you're considering a metaclass -- or other highly involved techniques like runtime [monkey-patching](https://www.youtube.com/watch?v=ZpJxwpyJpq4) -- be sure you're actually solving the problem and not embracing cleverness for its own sake.
