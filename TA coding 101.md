@@ -80,7 +80,7 @@ Library code resembles framework code in one way: it's still far away from the u
 
 Good libraries are easy to spot: they make it easy to do the right thing and hard to do the wrong thing.  [This talk](https://youtu.be/5tg1ONG18H8) is nominally about C++, but it's a good discussion of the ways api design and UX design are similar in any language.  Libraries should be designed for simplicity, consistency and lack of surprises.
 
-### Tools.
+### Tools
 
 Tools are the parts of our work that are visible to our users -- this is where the menus, buttons, dialogs and scripts go.  Tool coode marshals the functionality from our frameworks and libraries into a user-friendly package that's easy to maintain and support.  
 
@@ -243,14 +243,16 @@ Understudies can, and should, remind implementers if there is existing functiona
 
 In many cases -- particularly for more complex jobs -- the understudy will also be working on the same code.  In cases like that the two roles should basically be reversed as needed:  A understudies B's work and vice-versa.  
 
-Style notes
-============
+
+
+Appendix 1: Style nots
+-----------
 
 This section is going to be a bit subjective, and is not intended to be enforced as 'rules'.  It's a set of style considerations to consider when you are designing new code structures.  
 
 
-Appendix 1: Python style
-===========
+House Python Style
+=================
 
 First and foremost, think about how Python wants to be written.  Simplicity and readability are key values in python code.  There's a reason a lot of core Python developers use the word 'beautiful' a lot when talking about programming.
 
@@ -379,6 +381,8 @@ That's a quite a few more lines to write -- but once it's written all other name
 
 Formally you could do the same work in `try-except-finally` structure and be guaranteed to get the same results.  From a readability standpoint, however, the `Namespace` context manager is a big win -- it takes a series of steps that are all related, all necessary, and all pretty common in Maya programming and renders them both safe and easily readable at the same time.
 
+You may note that `with` blocks have a generic similarity to `try-except-finally` constructs.  Generally the former are best for things you have to do a lot, like namespaces and the latter are the fallback for one-offs.
+
 ### Closures
 
 Python [closures](https://www.programiz.com/python-programming/closure) are a very important tool for sharing data without the need for elaborate class structures.  The rules have some interesting subtleties, but basically they boil down to this:
@@ -449,6 +453,88 @@ The inheritance rule can be a bit intimidating, but closures are a very powerful
 Here, the closure allows the increment and decrement buttons to know which field to affect even after the function has fired and the window has been created.  You could achieve the same effect with a class, using instance fields and instance methods to connect the different widgets together. In complicated cases that's still a good way to go. However closures provide many of the same benefits with much less overhead and should be part of your design process.  
 
 Closures are particularly attractive because they are space efficient -- however you do need to avoid going too deep, or your readers may not be able to figure out where your variable names are coming from. If you are inheriting a variable several screens away from where it originates, at least leave a comment indicating where the name comes from. The `ALLCAPS` convention for module-level constants is also a good way to remind readers when they may be seeing a closure variable.
+
+### lists, tuples and dictionaries
+
+Collections are the heart of Python programming -- they're super useful and reduce a ton of the boring boilerplate common in other languages.
+
+It's important to get good use out of them, which means a couple of basic things:
+
+#### Use idiomatic looping
+
+ `for item in my_list: `  for most loops and `for index, value in enumerate(my_list)` if you need the indices, not `for i in range(len(my_list))):`
+
+For dictionaries, prefer `for item in my_dict` for most things, and `for item in my_dict.keys()` if you might be adding or removing entries in the loop.
+
+#### List comprehension are great -- if comprehensible
+
+Most of the time `my_list = [x for x in range(100) if x %2 ==0]`  is better than a for loop.  However if you're finding it hard to fit a comprehension onto a single like it's probably too complex and ought to revert to being a loop.
+
+#### Prefer tuples to lists if you can
+
+Tuples are slightly faster than lists, and they have less overhead if you don't expect their contents to change.  Whenever you're simply answering a question like "what are the objects in this Maya scene using this shader" -- it's better to return a tuple instead of a list, since it's the correct answer now and user's can't accidentally change it.  There's no way to, say, try to change a tuple while loopong over it.
+
+Tuples are also faster to create as literals.  List initializers are fast:
+
+    data = ['a', 'b', 'c']
+
+but tuple literals are faster:
+
+    tuple = 'a', 'b', 'c'
+
+(Note that it's the _commas_, not the parens, which define a tuple)
+
+So for kind of constant tuples are better
+
+Tuples can also be used as keys in a dictionary, where lists cannot.  So you could for example represent something like a chessboard as dictionary using tuples as keys:
+
+    Chessboard = {(0,0): 'Rook', (0,1), 'Pawn', ... }
+
+This is much more efficient than having an actual nested 2-d array to represent the board.
+
+#### Prefer namedtuples to tuples for structured data
+
+`(collections.namedtuple)[https://pymotw.com/2/collections/namedtuple.html]` offers an excellent alternative to dictionaries and custom classes for structured data.  It's far better to write
+
+    if person.age > 21:
+
+than 
+
+     if person[7] > 21
+
+ namedtuples make for more readable code with very little work.  They are also cheaper than dictionaries and -- being immutable, like tuples -- they are less prone to accidental mutations.
+
+#### Dictionary idioms
+
+Dictionaries are one of Python's best features -- an excellent way to handle information flexibly. Using them idiomatically is a key to good Python style:
+
+* Don't forget about dictionary comprehensions:  {k: v  for k, v in zip(keys, values)}
+* Check for inclusion with `if value in my_dict`.
+* Loop over the keys and vales together with `for key, value in my_dict.items()` (or `.iteritems()` to save memory).
+* Use `my_dict.get(key, fallback_value)` rather than checking to see if a key already exists.  Use `my_dict.setdefault(key, value)` to do the same thing _and_ to ensure that the key is present in future.
+* Remove dictionary keys and values with `del my_dict[key]`, but get-and-remove in one operation with `my_dict.pop(key)`  using `del` makes it clear that you intend to remove a key
+* Use `[collections.defaultdict](https://docs.python.org/2/library/collections.html#collections.defaultdict)` if you have to do a lot of checking to see if a dictionary already has what you need instead of hand-writing an if-check.  
+
+Dictionaries make a very useful alternative to long string of `if - elif - else` comparisons, particularly if you're routing to different code based on some value.  For example if you were tring to choose between  handler functions based on a selector string:
+
+     options = {
+        'a': a_handler,
+        'b': b_handler,
+        'c': c_handler
+     }
+     func = options.get(selector, fallback_handler)
+     func()
+
+is more compact and easier to extend than
+
+    if selector == 'a':
+        a_handler()
+    elif selector == 'b':
+        b_handler()
+    elif selector == 'c':
+        c_handler()
+    else:
+        fallback_handler()
 
 
 ### decorators
@@ -545,4 +631,4 @@ The functional part of the code is no different but this class operates in an ap
 On the other hand there are times when the magic is too deep and you risk tangling with Things Better Left Alone. Python [metaclasses](https://jakevdp.github.io/blog/2012/12/01/a-primer-on-python-metaclasses/) earned this quote for a reason:
 > “Metaclasses are deeper magic than 99% of users should ever worry about. If you wonder whether you need them, you don’t (the people who actually need them know with certainty that they need them, and don’t need an explanation about why).” — Tim Peters
 
-There really are legit applications for metaclasses, but they are rare (and often, the temptation to find uses coincides a bit too much with learning about metaclasses for the first time).  If you're considering a metaclass -- or other highly involved techniques like runtime [monkey-patching]() -- be sure you're actually solving the problem and not embracing cleverness for its own sake.
+There really are legit applications for metaclasses, but they are rare (and often, the temptation to find uses coincides a bit too much with learning about metaclasses for the first time).  If you're considering a metaclass -- or other highly involved techniques like runtime [monkey-patching](https://www.youtube.com/watch?v=ZpJxwpyJpq4) -- be sure you're actually solving the problem and not embracing cleverness for its own sake.
