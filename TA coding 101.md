@@ -277,6 +277,7 @@ Unfortunately, since most of of our python is written inside of Maya we are ofte
 
 ## Tools for simplification
 
+<a id='modules'></a>
 ### Modules
 
 Modules are a vital tool for keeping python code organized.  Keeping related code together in a well-named module allows for a good mix of descriptive names wihout redundancy.  Good modules reduce the need for extremely long function names, and allow for more flexibility in layout
@@ -294,6 +295,117 @@ Don't write a class just to create a holder for methods  -- make a nested python
 Python modules are also the right way to handle shared state which in other languages requires a singleton.  For example, you might want to have project related code for managing data about your working environment.  You would not want different parts of the same application to disagree about that kind of data.  In Python delegate that code to a module instead of trying to write a singleton class:  Modules are globally accessible, only run their own code once, and they are 'singletons' by default.  
 
 In general, "singleton" style shared state is something to avoid whenever possible in any case.  Too much shared state makes it too easy for bugs to crop up in untraceable ways.  However when you do need to share information, use the module mechanism as the easy, Pythonic way to maintain shared data.
+
+### Lists, Tuples and Dictionaries -- know the basics
+
+Collections are the heart of Python programming -- they're super useful and reduce a ton of the boring boilerplate common in other languages.
+
+It's important to get good use out of them, which means a couple of basic things:
+
+#### Use idiomatic looping
+
+ `for item in my_list: `  for most loops and `for index, value in enumerate(my_list)` if you need the indices, not `for i in range(len(my_list))):`
+
+For dictionaries, prefer `for item in my_dict` for most things, and `for item in my_dict.keys()` if you might be adding or removing entries in the loop.
+
+
+#### Learn slicing
+
+One of the best tools for writing compact, readable Python is [slice notation](https://medium.com/@adamshort/python-slicing-72f76bb36e31).  It's very useful for a wide variety of tasks -- anything from reversing a list to subsetting it to taking every Nth item can be done concisely with slices.
+
+An extra incentive to learn slicing is [`itertools.islice`](https://docs.python.org/2/library/itertools.html#itertools.islice) which offers the same functionality but as an iterator -- it's an elegant way to express an idea like "take every third item from this list, starting at number 10000 and counting down"  without the expense of creating a new in-mempory copy of the list.  See [Use Generators](generators), below.
+
+#### List comprehension are great -- if comprehensible
+
+Most of the time `my_list = [x for x in range(100) if x %2 ==0]`  is better than a for loop.  However if you're finding it hard to fit a comprehension onto a single like it's probably too complex and ought to revert to being a loop.
+
+
+#### Prefer tuples to lists if you can
+
+Tuples are slightly faster than lists, and they have less overhead if you don't expect their contents to change.  Whenever you're simply answering a question like "what are the objects in this Maya scene using this shader" -- it's better to return a tuple instead of a list, since it's the correct answer now and user's can't accidentally change it.  There's no way to, say, try to change a tuple while loopong over it.
+
+Tuples are also faster to create as literals.  List initializers are fast:
+
+    data = ['a', 'b', 'c']
+
+but tuple literals are faster (note, btw that it's the _commas_, not the parens, which define a tuple) 
+
+    tuple = 'a', 'b', 'c'
+
+So tuples are a natural fit for constants lookups or other data you don't expect to change at runtime.
+
+Tuples can also be used as keys in a dictionary, where lists cannot.  So you could for example represent something like a chessboard as dictionary using tuples as keys:
+
+    Chessboard = {(0,0): 'Rook', (0,1), 'Pawn', ... }
+
+This is much more efficient than having an actual nested 2-d array to represent the board.
+
+#### Prefer namedtuples to tuples for structured data
+
+(`collections.namedtuple`)[https://pymotw.com/2/collections/namedtuple.html] offers an excellent alternative to dictionaries and custom classes for structured data.  It's far better to write
+
+    if person.age > 21
+
+than 
+
+     if person[7] > 21
+
+ namedtuples make for more readable code with very little work.  They are also cheaper than dictionaries and -- being immutable, like tuples -- they are less prone to accidental mutations.
+
+#### Dictionary idioms
+
+Dictionaries are one of Python's best features -- an excellent way to handle information flexibly. Using them idiomatically is a key to good Python style:
+
+* Don't forget about dictionary comprehensions:  {k: v  for k, v in zip(keys, values)}
+* Check for inclusion with `if value in my_dict`.
+* Loop over the keys and vales together with `for key, value in my_dict.items()` (or `.iteritems()` to save memory).
+* Use `my_dict.get(key, fallback_value)` rather than checking to see if a key already exists.  Use `my_dict.setdefault(key, value)` to do the same thing _and_ to ensure that the key is present in future.
+* Remove dictionary keys and values with `del my_dict[key]`, but get-and-remove in one operation with `my_dict.pop(key)`  using `del` makes it clear that you intend to remove a key
+* Use [`collections.defaultdict`](https://docs.python.org/2/library/collections.html#collections.defaultdict) if you have to do a lot of checking to see if a dictionary already has what you need instead of hand-writing an if-check.  
+
+Dictionaries make a very useful alternative to long string of `if - elif - else` comparisons, particularly if you're routing to different code based on some value.  For example if you were tring to choose between  handler functions based on a selector string:
+
+     options = {
+        'a': a_handler,
+        'b': b_handler,
+        'c': c_handler
+     }
+     func = options.get(selector, fallback_handler)
+     func()
+
+is more compact and easier to extend than
+
+    if selector == 'a':
+        a_handler()
+    elif selector == 'b':
+        b_handler()
+    elif selector == 'c':
+        c_handler()
+    else:
+        fallback_handler()
+
+<a id="generators"></a>
+### Use Generators
+
+One of the most important things you can do to improve the speed of your Python is use generators and iterators instead of creating large in memory lists.
+
+These two pieces of code produce the same result:
+    
+    test = 0
+    for n in range( int(40e6)):
+        test += n
+
+and 
+
+    test = 0
+    for n in xrange (int (40e6)):
+        test += n
+
+however the second one is **40% faster** because it does not create a complete list in memory of 40,000,000 integers -- it just processes the numbers one at a time.
+
+Whenever possible, use the `[yield](https://jeffknupp.com/blog/2013/04/07/improve-your-python-yield-and-generators-explained/)` keyword to have your functions generate results that can be iterated over, rather than lists which have to be created in memory.  If the caller needs the entire list, it's easy to turn a generator into a list or a tuple.  But if the caller does not need the whole thing in one go -- if they just want to process items one at a time -- widespread use of generators makes for faster, more memory efficient code.  
+
+It's also easy to [chain generators together to create fast pipeline-style code](https://brett.is/writing/about/generator-pipelines-in-python/ which does filtering or transformations in small, composable pieces.  The helps with both reusability and performance.
 
 
 ### Try-Except-Finally
@@ -469,87 +581,6 @@ Here, the closure allows the increment and decrement buttons to know which field
 
 Closures are particularly attractive because they are space efficient -- however you do need to avoid going too deep, or your readers may not be able to figure out where your variable names are coming from. If you are inheriting a variable several screens away from where it originates, at least leave a comment indicating where the name comes from. The `ALLCAPS` convention for module-level constants is also a good way to remind readers when they may be seeing a closure variable.
 
-### lists, tuples and dictionaries
-
-Collections are the heart of Python programming -- they're super useful and reduce a ton of the boring boilerplate common in other languages.
-
-It's important to get good use out of them, which means a couple of basic things:
-
-#### Use idiomatic looping
-
- `for item in my_list: `  for most loops and `for index, value in enumerate(my_list)` if you need the indices, not `for i in range(len(my_list))):`
-
-For dictionaries, prefer `for item in my_dict` for most things, and `for item in my_dict.keys()` if you might be adding or removing entries in the loop.
-
-#### List comprehension are great -- if comprehensible
-
-Most of the time `my_list = [x for x in range(100) if x %2 ==0]`  is better than a for loop.  However if you're finding it hard to fit a comprehension onto a single like it's probably too complex and ought to revert to being a loop.
-
-#### Prefer tuples to lists if you can
-
-Tuples are slightly faster than lists, and they have less overhead if you don't expect their contents to change.  Whenever you're simply answering a question like "what are the objects in this Maya scene using this shader" -- it's better to return a tuple instead of a list, since it's the correct answer now and user's can't accidentally change it.  There's no way to, say, try to change a tuple while loopong over it.
-
-Tuples are also faster to create as literals.  List initializers are fast:
-
-    data = ['a', 'b', 'c']
-
-but tuple literals are faster:
-
-    tuple = 'a', 'b', 'c'
-
-(Note that it's the _commas_, not the parens, which define a tuple)
-
-So for kind of constant tuples are better
-
-Tuples can also be used as keys in a dictionary, where lists cannot.  So you could for example represent something like a chessboard as dictionary using tuples as keys:
-
-    Chessboard = {(0,0): 'Rook', (0,1), 'Pawn', ... }
-
-This is much more efficient than having an actual nested 2-d array to represent the board.
-
-#### Prefer namedtuples to tuples for structured data
-
-(`collections.namedtuple`)[https://pymotw.com/2/collections/namedtuple.html] offers an excellent alternative to dictionaries and custom classes for structured data.  It's far better to write
-
-    if person.age > 21
-
-than 
-
-     if person[7] > 21
-
- namedtuples make for more readable code with very little work.  They are also cheaper than dictionaries and -- being immutable, like tuples -- they are less prone to accidental mutations.
-
-#### Dictionary idioms
-
-Dictionaries are one of Python's best features -- an excellent way to handle information flexibly. Using them idiomatically is a key to good Python style:
-
-* Don't forget about dictionary comprehensions:  {k: v  for k, v in zip(keys, values)}
-* Check for inclusion with `if value in my_dict`.
-* Loop over the keys and vales together with `for key, value in my_dict.items()` (or `.iteritems()` to save memory).
-* Use `my_dict.get(key, fallback_value)` rather than checking to see if a key already exists.  Use `my_dict.setdefault(key, value)` to do the same thing _and_ to ensure that the key is present in future.
-* Remove dictionary keys and values with `del my_dict[key]`, but get-and-remove in one operation with `my_dict.pop(key)`  using `del` makes it clear that you intend to remove a key
-* Use [`collections.defaultdict`](https://docs.python.org/2/library/collections.html#collections.defaultdict) if you have to do a lot of checking to see if a dictionary already has what you need instead of hand-writing an if-check.  
-
-Dictionaries make a very useful alternative to long string of `if - elif - else` comparisons, particularly if you're routing to different code based on some value.  For example if you were tring to choose between  handler functions based on a selector string:
-
-     options = {
-        'a': a_handler,
-        'b': b_handler,
-        'c': c_handler
-     }
-     func = options.get(selector, fallback_handler)
-     func()
-
-is more compact and easier to extend than
-
-    if selector == 'a':
-        a_handler()
-    elif selector == 'b':
-        b_handler()
-    elif selector == 'c':
-        c_handler()
-    else:
-        fallback_handler()
 
 
 ### decorators
