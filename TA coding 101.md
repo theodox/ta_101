@@ -260,13 +260,13 @@ In many cases -- particularly for more complex jobs -- the understudy will also 
 
 
 
-Appendix 1: Style nots
+Appendix 1: Style note
 -----------
 
 This section is going to be a bit subjective, and is not intended to be enforced as 'rules'.  It's a set of style considerations to consider when you are designing new code structures.  
 
 
-House Python Style
+Python Style
 =================
 
 First and foremost, think about how Python wants to be written.  Simplicity and readability are key values in python code.  There's a reason a lot of core Python developers use the word 'beautiful' a lot when talking about programming.
@@ -342,7 +342,7 @@ This is much more efficient than having an actual nested 2-d array to represent 
 
 #### Prefer namedtuples to tuples for structured data
 
-(`collections.namedtuple`)[https://pymotw.com/2/collections/namedtuple.html] offers an excellent alternative to dictionaries and custom classes for structured data.  It's far better to write
+`[collections.namedtuple](https://pymotw.com/2/collections/namedtuple.html)` offers an excellent alternative to dictionaries and custom classes for structured data.  It's far better to write
 
     if person.age > 21
 
@@ -583,7 +583,7 @@ Closures are particularly attractive because they are space efficient -- however
 
 
 
-### decorators
+### Decorators
 
 Python decorators are a powerful tool for making simpler code. A decorator is basically just a way of wrapping a ordinary function to add some additional functionality.  For a toy example:
 
@@ -613,7 +613,7 @@ Decorators are a very powerful tool for enforcing consistency across functions w
 
 The one thing to remember about decorators is that they shouldn't interfere with readability:  a decorator that automatically right-slashes file names won't surprise readers, but one which causes a function that looks like it returns string to return numbers instead will generate a lot of confusion.
 
-# The proper uses of magic
+## Afterword: The proper uses of magic
 
 Python has a high magic quotient; you can change a lot about the behavior of basic Python entities, allowing you to customize many aspects of how your code looks and acts.  In the right circumstances this is a very powerful tool: you can write code that more clearly and concisely expresses its intent if you know how to use advanced techniques.  However, this is a power that should be used _sparingly_: it's very easy for a system to become so sophisticated that  it's incomprehensible to any one except the author -- or, sometimes, _including_ the author once a few months have passed.
 
