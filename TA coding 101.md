@@ -304,9 +304,42 @@ It's important to get good use out of them, which means a couple of basic things
 
 #### Use idiomatic looping
 
- `for item in my_list: `  for most loops and `for index, value in enumerate(my_list)` if you need the indices, not `for i in range(len(my_list))):`
+Use  
 
-For dictionaries, prefer `for item in my_dict` for most things, and `for item in my_dict.keys()` if you might be adding or removing entries in the loop.
+    for item in my_list:
+       do_thing(item)
+
+for most loops and 
+
+    for index, value in enumerate(my_list):
+       do_thing(index, item)
+
+if you need the indices.  Don't use `for i in range(len(my_list)))`
+
+For dictionaries, prefer 
+
+    for item in my_dict
+
+for most things, and
+   
+    for item in my_dict.keys()
+
+if you might be adding or removing entries in the loop.
+
+#### Use 'in' for content checks:
+
+Use 
+   
+    if "x" in my_list
+
+and
+
+    if "x" in my_dict
+
+and
+
+    if "x" in my_tuple
+
 
 
 #### Learn slicing
