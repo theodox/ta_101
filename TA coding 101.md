@@ -35,6 +35,7 @@ When working on runtime code, we need to be sure to:
 * **Use profiling data** to make sure you're optimizing the right things
 * Make sure we **understand the memory costs** of our work
 
+<a id="frameworks"></a>
 ### Frameworks
 
 This is code that's intended to solve a general problem in a repeatable way.  It could be a library for reading and writing a particular file type, or a system for adding metadata to an import pipeline.  Out-of-house examples would be something like the `xmltree` module or `django`, which will be specialized by other users to solve concrete problems.
@@ -52,6 +53,7 @@ Famework code needs to:
 
 Framework code is going to be deep down in the foundational layers of code that users see. Because it's not close to users it can't make assumptions on their behalves. Framework code should resist the temptation to make guesses about what users want: just fail loudly and let code closer to the user decide what to do next.
 
+<a id="libraries"></a>
 ### Libraries
 
 This is the largest category of TA code -- the place where most of the problem / solution work is actually done.  Library code is re-usable code that's specific to particular problem set:  dealing with UV sets in Maya, or providing debug info in Unreal.  Like framework code, libraries are basically invisible to end users: the customers for libraries are fellow coders.
@@ -77,6 +79,7 @@ Library code resembles framework code in one way: it's still far away from the u
 
 Good libraries are easy to spot: they make it easy to do the right thing and hard to do the wrong thing.  [This talk](https://youtu.be/5tg1ONG18H8) is nominally about C++, but it's a good discussion of the ways api design and UX design are similar in any language.  Libraries should be designed for simplicity, consistency and lack of surprises.
 
+<a id="tools"></a>
 ### Tools
 
 Tools are the parts of our work that are visible to our users -- this is where the menus, buttons, dialogs and scripts go.  Tool code marshals the functionality from our frameworks and libraries into a user-friendly package that's easy to maintain and support.  
@@ -269,11 +272,21 @@ This section is going to be a bit subjective, and is not intended to be enforced
 Python Style
 =================
 
-First and foremost, think about how Python wants to be written.  Simplicity and readability are key values in python code.  There's a reason a lot of core Python developers use the word 'beautiful' a lot when talking about programming.
+First and foremost, think about **how Python wants to be written**.  Simplicity and readability are key values in python code.  There's a reason a lot of core Python developers use the word 'beautiful' a lot when talking about programming.  Making good use of common Python idioms will make your code easier to read and maintain for everybody on the team.
 
-Unfortunately, since most of of our python is written inside of Maya we are often writing agains an API  that is neither very simple nor very readable. Everybody who works with Maya has had to write countless variations on `cmds.getAttr(object_name + '.property')` or `cmds.editDisplayLayerMembers( 'displayLayer1', query=True)`.  Neither line is a big deal -- but both impose an incremental tax on your thought process, particularly when you're reading a long, complex piece code where the Maya mechanics are main point. When you first learn Maya the challenge is simply getting things working and that kind of very explicit step-by-step code is part of the learning process. When you're more senior, you will start seeing opportunities to clean up and clarify the chattiness and clutter of the Maya api.
+Unfortunately, since most of of our python is written inside of Maya we are often writing agains an API  that is neither very simple nor very readable. Everybody who works with Maya has had to write countless variations on
+ 
+    cmds.getAttr(object_name + '.property')
 
-> [This talk](https://www.youtube.com/watch?v=wf-BqAjZb8M) is a really good example of the thinking behind this section -- it's from a Python core developer explaining how to 'Pythonify' an api that was written for another language mindset.  It's a natural analogy for how we relate to Maya.
+or 
+
+    cmds.editDisplayLayerMembers( 'displayLayer1', query=True)
+
+Neither of these line is a big deal -- but both impose an incremental tax on your thought process, particularly when you're reading a long, complex piece code where the Maya mechanics are main point. When you first learn Maya the challenge is simply getting things working and that kind of very explicit step-by-step code is part of the learning process. When you're more senior, you will start seeing opportunities to clean up and clarify the chattiness and clutter of the Maya API.  
+
+It is a good idea to resist the temptation to write and endless series of wrappers for convenience.  A good simplification is one that expresses your intentions better and offers more tools for working with the problem -- not just one that saves a few characters!   See the discussion of [frameworks](frameworks) above.
+
+[This talk](https://www.youtube.com/watch?v=wf-BqAjZb8M) by Raymond Hettinger is a great example of how you want to approach code simplficiation -- it's an example of a Python core developer explaining how to 'Pythonify' an api that was written for another language mindset.  It's a natural analogy for how we relate to Maya.
 
 ## Tools for simplification
 
