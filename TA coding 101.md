@@ -263,7 +263,7 @@ In many cases -- particularly for more complex jobs -- the understudy will also 
 
 
 
-Appendix 1: Style note
+Appendix 1: Style notes
 -----------
 
 This section is going to be a bit subjective, and is not intended to be enforced as 'rules'.  It's a set of style considerations to consider when you are designing new code structures.  
@@ -284,11 +284,11 @@ or
 
 Neither of these line is a big deal -- but both impose an incremental tax on your thought process, particularly when you're reading a long, complex piece code where the Maya mechanics are main point. When you first learn Maya the challenge is simply getting things working and that kind of very explicit step-by-step code is part of the learning process. When you're more senior, you will start seeing opportunities to clean up and clarify the chattiness and clutter of the Maya API.  
 
-It is a good idea to resist the temptation to write and endless series of wrappers for convenience.  A good simplification is one that expresses your intentions better and offers more tools for working with the problem -- not just one that saves a few characters!   See the discussion of [frameworks](frameworks) above.
+It is a good idea to resist the temptation to write and endless series of wrappers for convenience.  A good simplification is one that expresses your intentions better and offers more tools for working with the problem -- not just one that saves a few characters!   See the discussion of [frameworks](#frameworks) above.
 
 [This talk](https://www.youtube.com/watch?v=wf-BqAjZb8M) by Raymond Hettinger is a great example of how you want to approach code simplficiation -- it's an example of a Python core developer explaining how to 'Pythonify' an api that was written for another language mindset.  It's a natural analogy for how we relate to Maya.
 
-## Tools for simplification
+## The toolbox
 
 <a id='modules'></a>
 ### Modules
@@ -359,7 +359,7 @@ and
 
 One of the best tools for writing compact, readable Python is [slice notation](https://medium.com/@adamshort/python-slicing-72f76bb36e31).  It's very useful for a wide variety of tasks -- anything from reversing a list to subsetting it to taking every Nth item can be done concisely with slices.
 
-An extra incentive to learn slicing is [`itertools.islice`](https://docs.python.org/2/library/itertools.html#itertools.islice) which offers the same functionality but as an iterator -- it's an elegant way to express an idea like "take every third item from this list, starting at number 10000 and counting down"  without the expense of creating a new in-mempory copy of the list.  See [Use Generators](generators), below.
+An extra incentive to learn slicing is [`itertools.islice`](https://docs.python.org/2/library/itertools.html#itertools.islice) which offers the same functionality but as an iterator -- it's an elegant way to express an idea like "take every third item from this list, starting at number 10000 and counting down"  without the expense of creating a new in-mempory copy of the list.  See [Use Generators](#generators), below.
 
 #### List comprehension are great -- if comprehensible
 
