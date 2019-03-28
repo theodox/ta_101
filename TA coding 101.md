@@ -342,7 +342,7 @@ This is much more efficient than having an actual nested 2-d array to represent 
 
 #### Prefer namedtuples to tuples for structured data
 
-`[collections.namedtuple](https://pymotw.com/2/collections/namedtuple.html)` offers an excellent alternative to dictionaries and custom classes for structured data.  It's far better to write
+[`collections.namedtuple`](https://pymotw.com/2/collections/namedtuple.html) offers an excellent alternative to dictionaries and custom classes for structured data.  It's far better to write
 
     if person.age > 21
 
