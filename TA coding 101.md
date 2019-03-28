@@ -438,7 +438,7 @@ however the second one is **40% faster** because it does not create a complete l
 
 Whenever possible, use the [`yield`](https://jeffknupp.com/blog/2013/04/07/improve-your-python-yield-and-generators-explained/) keyword to have your functions generate results that can be iterated over, rather than lists which have to be created in memory.  If the caller needs the entire list, it's easy to turn a generator into a list or a tuple.  But if the caller does not need the whole thing in one go -- if they just want to process items one at a time -- widespread use of generators makes for faster, more memory efficient code.  
 
-It's also easy to [chain generators together to create fast pipeline-style code](https://brett.is/writing/about/generator-pipelines-in-python/ which does filtering or transformations in small, composable pieces.  The helps with both reusability and performance.
+It's also easy to [chain generators together to create fast pipeline-style code](https://brett.is/writing/about/generator-pipelines-in-python/) which does filtering or transformations in small, composable pieces.  The helps with both reusability and performance.
 
 <a id="tryblocks"></a>
 ### Try-Except-Finally
