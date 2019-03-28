@@ -296,6 +296,7 @@ Python modules are also the right way to handle shared state which in other lang
 
 In general, "singleton" style shared state is something to avoid whenever possible in any case.  Too much shared state makes it too easy for bugs to crop up in untraceable ways.  However when you do need to share information, use the module mechanism as the easy, Pythonic way to maintain shared data.
 
+<a id="basics"></a>
 ### Lists, Tuples and Dictionaries -- know the basics
 
 Collections are the heart of Python programming -- they're super useful and reduce a ton of the boring boilerplate common in other languages.
@@ -341,7 +342,6 @@ and
     if "x" in my_tuple
 
 
-
 #### Learn slicing
 
 One of the best tools for writing compact, readable Python is [slice notation](https://medium.com/@adamshort/python-slicing-72f76bb36e31).  It's very useful for a wide variety of tasks -- anything from reversing a list to subsetting it to taking every Nth item can be done concisely with slices.
@@ -375,7 +375,7 @@ This is much more efficient than having an actual nested 2-d array to represent 
 
 #### Prefer namedtuples to tuples for structured data
 
-[`collections.namedtuple`](https://pymotw.com/2/collections/namedtuple.html) offers an excellent alternative to dictionaries and custom classes for structured data.  It's far better to write
+[`collections.namedtuple`](https://pymotw.com/2/collections/namedtuple.html)offers an excellent alternative to dictionaries and custom classes for structured data.  It's far better to write
 
     if person.age > 21
 
@@ -436,11 +436,11 @@ and
 
 however the second one is **40% faster** because it does not create a complete list in memory of 40,000,000 integers -- it just processes the numbers one at a time.
 
-Whenever possible, use the `[yield](https://jeffknupp.com/blog/2013/04/07/improve-your-python-yield-and-generators-explained/)` keyword to have your functions generate results that can be iterated over, rather than lists which have to be created in memory.  If the caller needs the entire list, it's easy to turn a generator into a list or a tuple.  But if the caller does not need the whole thing in one go -- if they just want to process items one at a time -- widespread use of generators makes for faster, more memory efficient code.  
+Whenever possible, use the [`yield`](https://jeffknupp.com/blog/2013/04/07/improve-your-python-yield-and-generators-explained/) keyword to have your functions generate results that can be iterated over, rather than lists which have to be created in memory.  If the caller needs the entire list, it's easy to turn a generator into a list or a tuple.  But if the caller does not need the whole thing in one go -- if they just want to process items one at a time -- widespread use of generators makes for faster, more memory efficient code.  
 
 It's also easy to [chain generators together to create fast pipeline-style code](https://brett.is/writing/about/generator-pipelines-in-python/ which does filtering or transformations in small, composable pieces.  The helps with both reusability and performance.
 
-
+<a id="tryblocks"></a>
 ### Try-Except-Finally
 
 `try` and `except` are basic parts of Python.  Their lesser-known sibling `finally` however is a very powerful tool for writing cleaner code.  The basic structure is :
@@ -473,6 +473,7 @@ This looks OK -- the code correctly handles a case where, say, 'filename' is wri
 
 In this version, `output` will be properly closed no matter what else happens.  In Maya programming this is often a vital tool for making sure that the scene is restored to a legitimate state if one of your tool operations goes awry.
 
+<a id="contexts"></a>
 ### Context managers
 
 A variant on the same theme is the context manager: the Python construct that start with `with`.  A context manager is an excellent way package up work that has a defined beginning, middle and end in a readable, but also safe way.
@@ -543,6 +544,8 @@ Formally you could do the same work in `try-except-finally` structure and be gua
 
 You may note that `with` blocks have a generic similarity to `try-except-finally` constructs.  Generally the former are best for things you have to do a lot, like namespaces and the latter are the fallback for one-offs.
 
+
+<a id="closures"></a>
 ### Closures
 
 Python [closures](https://www.programiz.com/python-programming/closure) are a very important tool for sharing data without the need for elaborate class structures.  The rules have some interesting subtleties, but basically they boil down to this:
