@@ -110,7 +110,7 @@ These sections are not really 'rules': they form a logical sequence.  TA code is
 
 ### Talk It Out
 
-The first thing to do when starting a new project is _don't start writing._  Start by _talking_ to colleagues and customers to make sure you understand what you're being asked to do.  
+The first thing to do when starting a new project is _don't start writing._  Start by _talking_ to colleagues and customers to make sure you understand what you're being asked to do.  Tools are there for people, so don't write tools without learning about the people who you'll be helping!
 
 In that conversation, sketch out a general idea of how it ought to work.  For a big project that's probably an actual meeting, but for most work this could be a five minute conversation with the [understudy](#working-together) on the code.
 
@@ -122,18 +122,17 @@ It's tempting to try solving all future problems when writing code, particularly
 
 Don't. 
 
-We need to _think_ about future problems and try to solve today's issues without prejudicing future enhancements. But we don't want to actually write code that we don't need right now.  
+We need to _think_ about future problems and try to solve today's issues without prejudicing future enhancements. But we don't want to actually write code that we don't need right now. 
 
-The hard truth of TA life is that the future we are envisioning may not ever arrive, or will arrive in an almost unrecognizable form.  So, **don't do work today to solve a problem that may never come to pass**.
+The hard truth of TA life is that the future we are envisioning may not ever arrive, or will arrive in an almost unrecognizable form.  So, **don't do work today to solve a problem that may never come to pass**. [YAGNI](https://en.wikipedia.org/wiki/You_aren%27t_gonna_need_it#:~:text=%22You%20aren't%20gonna%20need,add%20functionality%20until%20deemed%20necessary.) is a good guest in your planning conversations. 
 
-An idea for how to solve a future problem is a great note to put into a comment or @todo.  But don't write future code until it serves a present need.  Long-lived library and especially framework code need to be more future-friendly.  However, even there it's a good idea to write as little code as is practical today.
+An idea for how to solve a future problem is a great note to put into a comment or @todo.  But don't write future code until it serves a present need.  Long-lived library and especially framework code need to be more future-friendly.  However, even there it's a good idea to write as little code as is practical today. 
 
 ### Garden Your Code
 
-Code is alive. We want to guide its growth and trim it back when it gets overgrown.  An ongoing diet of small upgrades and improvements is better than letting code rot for years and then doing dramatic, drastic surgery on it. 
-Refactoring is just an ongoing part of maintenance --  not a scary dramatic intervention.
+Code is alive. We want to guide its growth and trim it back when it gets overgrown.  An ongoing diet of small upgrades and improvements is better than letting code rot for years and then doing dramatic, drastic surgery on it. A commitment to ongoing improvement makes is safe to defer tomorrow's problems to tomorrow and solve them when we know what they really look like. 
 
-For this reaon, we want to be comfortable with refactoring as a regular part of our work.  We want to do as much testing as possible so that maintenance can be done with maximum safety and minimal disruption.   
+Refactoring is just an ongoing part of maintenance -- It should not be seen as a scary dramatic intervention.  For this reaon, we want to be comfortable with refactoring as a regular part of our work.  We want to do as much testing as possible so that maintenance can be done with maximum safety and minimal disruption.   
 
 We also want to retire code that's not serving a purpose any longer.  It's all backed up, if we need it again some day we can find it again.  But leaving unused code around provides a temptation to borrow from it -- thereby to keep alive not just the one function that was borrowed, but all of its dependencies alive.
 

@@ -1,8 +1,6 @@
+This section covers the ways in which different parts of the hiring process lead to different kinds of questions and different styles of analysis.  We use the same word for a 40-minute first contact call and for a grueling all-day round of meetings with a dozen people, but those are really two very different kinds of "interview" with different purposes and different rules.
 
-
-
-
-### Screening
+## Screening
 Some interviews are really intended for **screening**. These kinds of conversations are about making sure that the candidate is broadly suitable for the job on offer: Are they familiar with the technologies they'll need to work with? Do they understand the basics of a problem domain? Will they be able to avoid with common pitfalls? 
 
 A screening conversation is to some extent a pass-fail situation. They goal of screening is not to waste either the candidate's or the interview team's time on an interview that is unlikely to result in an offer. If you need a character rigger but for some reason you're talking to a shader artist for the role, it's not an act of kindness to move them along to an interview with the character team that's going to be unpleasant for both sides. Thus, screening conversations tend to put more emphasis on previous experience and knowledge.
@@ -38,57 +36,5 @@ In a final interview loop its often nice to have different people play conflicti
 The last step in an interview process is the roundup or post-mortem (not, one might note, the most optimistic name). Here the hiring manager and the interview team 
 
 ----------
-
-
-### Why write this all down? 
-
-The questions are useful as starting points to structure an interview session, but don’t neglect the notes attached to the questions. The comments are there to help the interview reveal a candidate’s skills, mindsets, and potential. A good question is not about “passing” or “failing.” Each question in this doc includes notes suggesting things to look for in the answer and points for possible follow-up. 
-
-It’s important to remember that this is a guide. It’s not a strict, one-size-fits-all script that must be followed to the letter! Start with appropriate questions and tailor them to the position and the individual. Don’t obsess over following the precise wording of the questions. Being present in the "room" (or the Zoom) with the candidate is infinitely more important than robotically sticking to the wording here.
-
-All that said: a standardized set of questions is a good tool for combating unconscious biases and ensuring that every candidate gets an equitable opportunity to show us what they are capable of. As interviewers become more and more familiar with the standard questions they’ll have an easier time spotting individuality in the candidate’s responses. It’s a good idea to share the question bank doc with the interview team ahead of time and pick a set of questions that relate to the position being filled, ensuring that all candidates get a roughly comparable set of questions. Good interviews are conversations, not quizzes, but having clear up-front expectations is an important part of equitable interviewing. 
-
-
-
-### Question formats
-
-These questions are intended to encourage answers which give the interviewer room to explore. **Pass-fail** style questions raise the emotional stakes: if a candidate senses they have stepped on a landmine, this can derail the interview by adding unnecessary extra stress. Open-ended  **informational** questions give the candidate room to reveal themselves and provide a better look at the candidate’s potential and the nuances of their approach to work.
-
-There are four basic question formats:
-
-* **Story** questions (“tell me about a time when…”) are better than simple yes-no questions (“have you used …?”). Stories give the candidate a lot of room to show their values and mindsets as well as providing factual information or knowledge checking.
-* Questions reflecting **best or worst experiences** (“What was the worst production problem you ever had to solve?”) can give a good window into the candidate’s approach to work in general. 
-* **Self-description questions** explore how well the candidate understands their own place in the field. Many people will under-sell their own skills to avoid appearing too vain, while others will try very hard to overplay their real experience. Both of those types of answers can be instructive. Because of the emotional freight here it's important to be attentive to patterns in the candidate's answer and not to assume they their self description is 100% accuate; that said it's a good guide to many workplace behaviors.
-* **Scenario-based questions** where candidate will interactively work to sketch out a design or solve a problem are a great way to see how well a candidate deals with open-ended situations and imperfect information. However it’s important that these questions are exploratory and interactive and not the equivalent of a pass-fail whiteboard coding session. Look for how candidates prepare themselves to tackle hard problems, don't  “flunk” them for not having the exact mix of experience and opinions you'd like.
-
-Most of the questions are actually written as strings of questions -– an initial setup followed by follow-ups. You won’t want to throw the whole string at the candidate in one go; the follow-ups might or might not be needed depending on the nature of the initial answer. Inevitably, many lines of questioning will hit dead ends because the candidate has no relevant experiences or insights to share – it’s a good idea to have a few spare questions on deck so that you can quickly move on when the candidate just doesn’t have much to say on a particular topic.
-
-You'll also see this list is long -- long enought fo many, many interview sessions. Different interviewers and the need of different teams will dictate a different mix of questions, which is why this question list is so long.  Mixing and matching is a good exercise for the interview team -- deciding together what questions are worth asking for a particular position is a great exercise for clarifying and aligning the whole interview group's sense of mission.  As your interview process matures you'll also invent new questions of your own that are specific to your team culture or your work environment. You should absolutely evolve this list to include your own specific concerns -- There is nothing magical or authoritative about the individual questions on this list.
-
-### Interviewer hints 
-
-All of the questions in the doc will include an associated set of hints. These hints are there to highlight the kind of information that we really care about when asking a particular question.  A question about past crises, for example, can tell us things like how the candidate handles stress, whether they have good conflict resolution skills, or whether they are able to acknowledge their own missteps; the hints are there to suggest both things to observe and things to follow up on. 
-
-The hints can also be useful for steering the conversation in a useful direction: the kinds of open-ended questions we prefer sometimes let a candidate get lost in irrelevant details that are not very informative for us. The hints associated with the questions here can be helpful to interviewers who need to nudge a discussion back in a more productive direction. 
-
-As a side note: it’s very useful to note the pattern in the way a candidate answers open-ended questions: are they good at retaining the thread of a conversation, or do they wander? Are they very vague, or do they load their answers with irrelevancies? Are they good at making sure you follow the gist of their answers? 
-
-The hints for each question also include notes about where it may or may not be useful. For example:
-  - Is this question better for junior or senior candidates?
-  - Which values or leadership skills does this question likely relate to?
-
-Scenario based questions are often deliberately incomplete, since so much TA work is about ferreting out the real needs of our customers and partners. The hints for scenario questions usually include extra information that the candidate will want to give a good answer.  As always, beware of inadvertently turning any single question into a single pass/fail test, but do pay attention to the kinds of questions a candidate asks when given an open-ended scenario to think throguth.
-
-## Question Areas
-
-The questions are divided thematically. You'll not that the traditional traditional knowledge-based questions are lumped together into [[Domain knowledge]], which is is subdivided more finely.
-
-- **[[Collaboration and communication]]**: how a candidate works with immediate teammates, with "customers", and with other disciplines
-- **[[Problem Solving]]**: how to approach messy, open-ended techart problems
-- **[[Production Wisdom]]**: dealing with production realities effectively
-- **[[Industry]]**: breadth of experience in the field, but also important for understanding the candidate's approach to learning and growth
-- **[[UI/UX and Design]]**: candidate's instincts for tool and workflow design
-- **[[Leadership]]**: leadership style and approach to management
-- **[[Domain knowledge]]**: traditional "how-to" questions.  
 
 

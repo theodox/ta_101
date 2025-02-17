@@ -16,7 +16,7 @@ When asking about their own experiences, ask for additional implementation detai
   - Sometimes this will also reveal a candidate who is gunning for a higher paying engineer title in the future
   
 2. Are you curently thinking about learning any new programming language? If so, why are you interested in that language? What are you doing to learn the language?
-    -  Interviewer should already know (from resume and/or prescreen) what languages the candidate knows. 
+    -  Interviewer should already know (from resume and/or prescreen) what languages the candidate knows! 
     - The choice of a subsequent language is a chance to see what problem spaces they are interested in: 
         - Do they want to learn C++ for higher performance or to get deeper into their engine? 
         - Are they interested in Rust because of its reputation for reliability? 

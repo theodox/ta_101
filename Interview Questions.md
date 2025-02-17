@@ -51,7 +51,7 @@ The questions are divided thematically. You'll note that the traditional traditi
 - **[[Domain knowledge]]**: traditional "how-to" questions.  
 
 
-
+   
 If you’re interested in contributing questions to the bank, be sure to place your questions in relevant categories.  More contributions are welcome! Contact Steve Theodore if you’re interested in helping maintain this document over the long run.
 ________________
 Questions
